@@ -1,13 +1,11 @@
 import React from 'react';
 
 export default function Head() {
-  const apiBase = process.env.NEXT_PUBLIC_PUBLIC_API_URL;
+  const apiBase = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
   let apiOrigin = '';
-  if (apiBase) {
-    try {
-      apiOrigin = new URL(apiBase).origin;
-    } catch {}
-  }
+  try {
+    apiOrigin = new URL(apiBase).origin;
+  } catch {}
   return (
     <>
       {apiOrigin && (
