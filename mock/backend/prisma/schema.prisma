@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id                Int                @id @default(autoincrement())
+  name              String
+  email             String             @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tokenVersion      Int                @default(0)
+  pushSubscriptions PushSubscription[]
+
+  @@map("admin")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  sku         String?     @unique
+  price       Float
+  stock       Int         @default(0)
+  minStock    Int         @default(10)
+  category    String
+  description String?
+  image       String?
+  status      String      @default("active")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  images      Json?       @default("[]")
+  inventory   Inventory?
+  orderItems  OrderItem[]
+  categoryRef Category    @relation(fields: [category], references: [name])
+
+  @@map("products")
+}
+
+model Inventory {
+  id           Int       @id @default(autoincrement())
+  productId    Int       @unique
+  quantity     Int       @default(0)
+  minStock     Int       @default(10)
+  maxStock     Int       @default(100)
+  location     String    @default("Almacén")
+  lastMovement DateTime?
+  movements    Json      @default("[]")
+  stockHistory Json      @default("[]")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory")
+}
+
+model Customer {
+  id               Int       @id @default(autoincrement())
+  name             String
+  cedula           String?   @unique
+  email            String    @unique
+  phone            String
+  address          String
+  city             String?
+  postalCode       String?
+  country          String    @default("Ecuador")
+  notes            String?
+  status           String    @default("active")
+  totalPurchases   Float     @default(0)
+  lastPurchaseDate DateTime?
+  registrationDate DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  password         String?
+  sales            Sale[]
+
+  @@map("customers")
+}
+
+model Sale {
+  id                 Int         @id @default(autoincrement())
+  customerId         Int?
+  customerName       String?
+  cedula             String?
+  status             String      @default("pending")
+  total              Float
+  subtotal           Float?
+  taxPercent         Float       @default(0)
+  discountPercent    Float       @default(0)
+  notes              String?
+  shippingAddress    String?
+  shippingPhone      String?
+  assignee           String?
+  attachments        Json        @default("[]")
+  cancellationReason String?
+  date               DateTime    @default(now())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  shippingCarrier    String?
+  shippingCost       Float?      @default(0)
+  shippingEta        String?
+  shippingMethodId   String?
+  shippingMethodName String?
+  shippingRegion     String?
+  shippingScope      String?
+  customerEmail      String?
+  items              OrderItem[]
+  customer           Customer?   @relation(fields: [customerId], references: [id])
+
+  @@map("sales")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  saleId    Int
+  productId Int
+  quantity  Int
+  price     Float
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String   @default("operator")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model StoreGeneral {
+  id          Int      @id @default(1)
+  name        String
+  description String?
+  email       String
+  phone       String
+  address     String
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  about       String?
+  contact     String?
+
+  @@map("store_general")
+}
+
+model StoreSocial {
+  id        Int      @id @default(1)
+  facebook  String?
+  instagram String?
+  whatsapp  String?
+  x         String?
+  tiktok    String?
+  youtube   String?
+  linkedin  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("store_social")
+}
+
+model StoreSchedule {
+  id        Int      @id @default(1)
+  days      Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("store_schedule")
+}
+
+model StoreShipping {
+  id              Int      @id @default(1)
+  policy          String?
+  standardCost    Float    @default(0)
+  freeShippingMin Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  carriers        Json     @default("[]")
+  rates           Json     @default("[]")
+
+  @@map("store_shipping")
+}
+
+model StorePayment {
+  id        Int      @id @default(1)
+  info      String?
+  methods   Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("store_payment")
+}
+
+model StoreFavicon {
+  id        Int      @id @default(1)
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("store_favicon")
+}
+
+model StoreLogo {
+  id        Int      @id @default(1)
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("store_logo")
+}
+
+model StoreTheme {
+  id         Int      @id @default(1)
+  primary    String   @default("#2196f3")
+  secondary  String   @default("#ff9800")
+  background String   @default("#f5f7fa")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("store_theme")
+}
+
+model Policy {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("policies")
+}
+
+model Carousel {
+  id          Int      @id @default(autoincrement())
+  imageUrl    String
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("carousel")
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      Admin    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@map("push_subscriptions")
+}

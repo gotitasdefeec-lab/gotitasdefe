@@ -1,0 +1,21 @@
+/*
+Animación de desvanecimiento para transiciones de página en Next.js App Router
+*/
+
+.page-fade {
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  background: #fff !important;
+}
+.page-fade-exit {
+  opacity: 1;
+}
+.page-fade-exit-active {
+  opacity: 0;
+}
+.page-fade-enter {
+  opacity: 0;
+}
+.page-fade-enter-active {
+  opacity: 1;
+}
