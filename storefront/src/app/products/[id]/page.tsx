@@ -12,18 +12,18 @@ type PageProps = {
 };
 
 // Pre-generate static pages for top products at build time
-export async function generateStaticParams() {
-  try {
-    const products = await productService.getProducts();
-    // Generate pages for first 20 products (most common)
-    return products.slice(0, 20).map((product) => ({
-      id: String(product.id),
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
+// export async function generateStaticParams() {
+//   try {
+//     const products = await productService.getProducts();
+//     // Generate pages for first 20 products (most common)
+//     return products.slice(0, 20).map((product) => ({
+//       id: String(product.id),
+//     }));
+//   } catch (error) {
+//     console.error('Error generating static params:', error);
+//     return [];
+//   }
+// }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id: idParam } = await params;
