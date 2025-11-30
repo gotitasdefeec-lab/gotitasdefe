@@ -1,7 +1,7 @@
 import React from 'react';
 import SimpleProductGrid from '@/components/products/SimpleProductGrid';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
+const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://vitaminic-yusuf-unnourishing.ngrok-free.dev';
 
 async function getProducts(categoryName?: string | null) {
   try {
