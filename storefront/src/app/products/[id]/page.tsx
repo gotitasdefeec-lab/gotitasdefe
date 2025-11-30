@@ -12,7 +12,6 @@ type PageProps = {
 };
 
 // Pre-generate static pages for top products at build time
-/*
 export async function generateStaticParams() {
   try {
     const products = await productService.getProducts();
@@ -25,7 +24,6 @@ export async function generateStaticParams() {
     return [];
   }
 }
-*/
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id: idParam } = await params;
