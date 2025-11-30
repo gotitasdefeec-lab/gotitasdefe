@@ -2,7 +2,7 @@ import React from 'react';
 import HeroCarousel from '@/components/HeroCarousel';
 import ProductGrid from '@/components/ProductGrid';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
+const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL;
 
 async function getFeaturedProducts() {
   try {
