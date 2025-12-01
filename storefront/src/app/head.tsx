@@ -3,9 +3,11 @@ import React from 'react';
 export default function Head() {
   const apiBase = process.env.NEXT_PUBLIC_PUBLIC_API_URL;
   let apiOrigin = '';
-  try {
-    apiOrigin = new URL(apiBase).origin;
-  } catch {}
+  if (apiBase) {
+    try {
+      apiOrigin = new URL(apiBase).origin;
+    } catch {}
+  }
   return (
     <>
       {apiOrigin && (
