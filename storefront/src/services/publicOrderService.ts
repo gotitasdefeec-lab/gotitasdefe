@@ -92,7 +92,7 @@ export const publicOrderService = {
         // 1) Decrease stock for each item in /products and /inventory
         // Cliente limpio para JSON Server (sin Authorization)
         const jsonApi = axios.create({
-          baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+          baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://seamus-shapeliest-overstiffly.ngrok-free.dev',
           headers: { 'Content-Type': 'application/json' },
           timeout: 10000,
         });
