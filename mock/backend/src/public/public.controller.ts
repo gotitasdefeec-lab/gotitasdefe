@@ -8,6 +8,7 @@ import { CarouselService } from '../carousel/carousel.service';
 import { SalesService } from '../sales/sales.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PaypalService } from '../paypal/paypal.service';
 
 @ApiTags('public')
 @Controller('public')
@@ -19,7 +20,8 @@ export class PublicController {
     private salesService: SalesService,
     private carouselService: CarouselService,
     private inventoryService: InventoryService,
-  ) {}
+    private paypalService: PaypalService,
+  ) { }
 
   // Authenticated Checkout
   @Post('checkout')
@@ -164,7 +166,7 @@ export class PublicController {
     try {
       // Get carousel data from the real service
       const carouselData = await this.carouselService.findAll();
-      
+
       // Return in the expected format with the available fields
       return carouselData.map(slide => ({
         id: slide.id,
@@ -177,7 +179,7 @@ export class PublicController {
       }));
     } catch (error) {
       console.error('Error fetching carousel data:', error);
-      
+
       // Return empty array if service fails
       return [];
     }
@@ -185,17 +187,17 @@ export class PublicController {
 
   // Public Order Endpoints
   @Post('orders')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Create new order (public)',
     description: 'Create a new order without authentication for checkout process'
   })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'Order created successfully' 
+  @ApiResponse({
+    status: 201,
+    description: 'Order created successfully'
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Invalid order data' 
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid order data'
   })
   async createPublicOrder(@Body() orderData: any) {
     try {
@@ -266,11 +268,11 @@ export class PublicController {
       };
     } catch (error) {
       console.error('Error creating public order:', error);
-      
+
       if (error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to create order. Please try again.');
     }
   }
@@ -284,5 +286,127 @@ export class PublicController {
       throw new BadRequestException('Order not found');
     }
     return order;
+  }
+
+  // PayPal Endpoints
+  // Temporary storage for order data (in production, use Redis or database)
+  private paypalOrderDataMap = new Map<string, any>();
+
+  @Post('paypal/create-order')
+  @ApiOperation({ summary: 'Create PayPal order' })
+  @ApiResponse({ status: 201, description: 'PayPal order created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  async createPayPalOrder(@Body() body: { amount: number; currency: string; orderData: any }) {
+    try {
+      const { amount, currency, orderData } = body;
+
+      if (!amount || amount <= 0) {
+        throw new BadRequestException('Invalid amount');
+      }
+
+      // Create PayPal order
+      const paypalOrder = await this.paypalService.createOrder(amount, currency || 'USD');
+
+      // Store order data temporarily (associate with PayPal order ID)
+      this.paypalOrderDataMap.set(paypalOrder.id, orderData);
+
+      // Clean up old entries after 1 hour
+      setTimeout(() => {
+        this.paypalOrderDataMap.delete(paypalOrder.id);
+      }, 60 * 60 * 1000);
+
+      return {
+        paypalOrderId: paypalOrder.id,
+        status: paypalOrder.status,
+        links: paypalOrder.links,
+      };
+    } catch (error) {
+      console.error('Error creating PayPal order:', error);
+      throw new BadRequestException(error.message || 'Failed to create PayPal order');
+    }
+  }
+
+  @Post('paypal/capture-order/:orderId')
+  @ApiOperation({ summary: 'Capture PayPal order and create sale' })
+  @ApiResponse({ status: 200, description: 'Payment captured and order created' })
+  @ApiResponse({ status: 400, description: 'Invalid request or payment failed' })
+  async capturePayPalOrder(@Param('orderId') paypalOrderId: string, @Body() body?: any) {
+    try {
+      // Capture the PayPal payment
+      const captureResult = await this.paypalService.captureOrder(paypalOrderId);
+
+      if (captureResult.status !== 'COMPLETED') {
+        throw new BadRequestException('Payment was not completed');
+      }
+
+      // Retrieve stored order data
+      const orderData = this.paypalOrderDataMap.get(paypalOrderId);
+
+      if (!orderData) {
+        throw new BadRequestException('Order data not found. Please try creating a new order.');
+      }
+
+      // Clean up stored data
+      this.paypalOrderDataMap.delete(paypalOrderId);
+
+      // Compute shipping meta if present
+      const shippingMeta = (() => {
+        const meta: any = {};
+        if (orderData.shippingMethodId) meta.shippingMethodId = String(orderData.shippingMethodId);
+        if (orderData.shippingMethodName) meta.shippingMethodName = String(orderData.shippingMethodName);
+        if (orderData.shippingCost != null) meta.shippingCost = Number(orderData.shippingCost);
+        if (orderData.shippingCarrier) meta.shippingCarrier = String(orderData.shippingCarrier);
+        if (orderData.shippingRegion) meta.shippingRegion = String(orderData.shippingRegion);
+        if (orderData.shippingScope) meta.shippingScope = String(orderData.shippingScope);
+        if (orderData.shippingEta) meta.shippingEta = String(orderData.shippingEta);
+        return meta;
+      })();
+
+      // Create sale record with the original order data
+      const saleData = {
+        customerName: orderData.customerName,
+        customerEmail: orderData.customerEmail || captureResult.payer?.email_address || '',
+        cedula: orderData.cedula || '',
+        status: 'paid', // Mark as paid since PayPal payment is completed
+        total: orderData.total,
+        subtotal: orderData.subtotal,
+        taxPercent: orderData.taxPercent || 0,
+        discountPercent: orderData.discountPercent || 0,
+        items: orderData.items.map((item: any) => ({
+          productId: item.productId,
+          name: item.name || '',
+          quantity: item.quantity,
+          price: item.price,
+          total: item.total || item.price * item.quantity
+        })),
+        notes: orderData.notes ? `${orderData.notes}\n\nPayPal Order ID: ${paypalOrderId}` : `PayPal Order ID: ${paypalOrderId}`,
+        shippingAddress: orderData.shippingAddress || '',
+        shippingPhone: orderData.shippingPhone || '',
+        ...shippingMeta,
+        date: new Date().toISOString(),
+        attachments: [],
+        paymentMethod: 'paypal',
+        paymentDetails: {
+          paypalOrderId: paypalOrderId,
+          paypalPayerId: captureResult.payer?.payer_id,
+          paypalEmail: captureResult.payer?.email_address,
+        },
+      };
+
+      const sale = await this.salesService.create(saleData as any);
+
+      return {
+        success: true,
+        orderId: sale.id,
+        paypalDetails: {
+          orderId: paypalOrderId,
+          status: captureResult.status,
+          payer: captureResult.payer,
+        },
+      };
+    } catch (error) {
+      console.error('Error capturing PayPal order:', error);
+      throw new BadRequestException(error.message || 'Failed to capture PayPal payment');
+    }
   }
 }

@@ -40,4 +40,29 @@ export const checkoutService = {
     const response = await publicApi.post('/public/orders', payload);
     return response.data;
   },
+
+  /**
+   * Creates a PayPal order in the backend.
+   */
+  async createPayPalOrder(payload: {
+    amount: number;
+    currency: string;
+    orderData: OrderPayload;
+  }): Promise<{ paypalOrderId: string }> {
+    const response = await publicApi.post('/public/paypal/create-order', payload);
+    return response.data;
+  },
+
+  /**
+   * Captures a PayPal order after user approval.
+   */
+  async capturePayPalOrder(paypalOrderId: string): Promise<{
+    success: boolean;
+    orderId: number;
+    paypalDetails: any;
+  }> {
+    const response = await publicApi.post(`/public/paypal/capture-order/${paypalOrderId}`);
+    return response.data;
+  },
 };
+

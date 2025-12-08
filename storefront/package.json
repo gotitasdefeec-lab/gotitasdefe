@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@paypal/react-paypal-js": "^8.9.2",
     "axios": "^1.12.2",
     "next": "^15.5.7",
     "react": "^19.2.1",

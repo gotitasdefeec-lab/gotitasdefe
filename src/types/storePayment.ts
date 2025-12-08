@@ -10,4 +10,8 @@ export interface PaymentMethod {
 export interface StorePayment {
   info: string;              // texto informativo general mostrado al cliente
   methods: PaymentMethod[];  // métodos disponibles
+  // PayPal Configuration
+  paypalClientId?: string;   // PayPal Client ID
+  paypalClientSecret?: string; // PayPal Client Secret (solo backend)
+  paypalMode?: 'sandbox' | 'live'; // Modo de PayPal
 }

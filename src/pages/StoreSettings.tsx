@@ -143,12 +143,12 @@ const StoreSettings: React.FC = () => {
           carriers,
           rates: cleanedRates,
         } as StoreShipping;
-  setShippingForm(normalizedShipping);
-  setUseFreeShipping((normalizedShipping.freeShippingMin ?? 0) > 0);
-  // initialize money inputs
-  setStandardCostInput(formatMoney(Number(normalizedShipping.standardCost || 0)));
-  setFreeShippingMinInput(formatMoney(Number(normalizedShipping.freeShippingMin || 0)));
-  setRatePriceInputs(Object.fromEntries((normalizedShipping.rates || []).map(r => [r.id, formatMoney(Number(r.price || 0))])));
+        setShippingForm(normalizedShipping);
+        setUseFreeShipping((normalizedShipping.freeShippingMin ?? 0) > 0);
+        // initialize money inputs
+        setStandardCostInput(formatMoney(Number(normalizedShipping.standardCost || 0)));
+        setFreeShippingMinInput(formatMoney(Number(normalizedShipping.freeShippingMin || 0)));
+        setRatePriceInputs(Object.fromEntries((normalizedShipping.rates || []).map(r => [r.id, formatMoney(Number(r.price || 0))])));
         setPaymentForm({
           info: pay.info || '',
           methods: Array.isArray(pay.methods) ? pay.methods : [],
@@ -434,184 +434,257 @@ const StoreSettings: React.FC = () => {
             <Tab label="Envíos" {...a11yProps(5)} />
             <Tab label="Métodos de pago" {...a11yProps(6)} />
           </Tabs>
-  {/* General */}
-  <TabPanel index={0} value={tab}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom color="primary.main">Información General</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Edita los datos principales de tu tienda. Estos datos se mostrarán en el sitio y comunicaciones.
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField label="Nombre de la tienda" value={generalForm.name ?? ''} onChange={e => setGeneralForm(f => ({ ...f, name: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField label="Email de contacto" value={generalForm.email ?? ''} onChange={e => setGeneralForm(f => ({ ...f, email: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField label="Teléfono" value={generalForm.phone ?? ''} onChange={e => setGeneralForm(f => ({ ...f, phone: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField label="Dirección" value={generalForm.address ?? ''} onChange={e => setGeneralForm(f => ({ ...f, address: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField label="Descripción" value={generalForm.description ?? ''} onChange={e => setGeneralForm(f => ({ ...f, description: e.target.value }))} fullWidth multiline minRows={2} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                      Contenido página Nosotros
+          {/* General */}
+          <TabPanel index={0} value={tab}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={8}>
+                <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" fontWeight={600} gutterBottom color="primary.main">Información General</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Edita los datos principales de tu tienda. Estos datos se mostrarán en el sitio y comunicaciones.
                     </Typography>
-                    <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                      <ReactQuill
-                        value={generalForm.about ?? ''}
-                        onChange={value => setGeneralForm(f => ({ ...f, about: value }))}
-                        theme="snow"
-                        style={{ height: '200px', background: '#fff' }}
-                        placeholder="Escribe la historia, misión, visión o valores de tu tienda."
-                        modules={{
-                          toolbar: [
-                            [{ 'header': [1, 2, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'image'],
-                            ['clean']
-                          ]
-                        }}
-                      />
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                      Contenido página Contacto
-                    </Typography>
-                    <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                      <ReactQuill
-                        value={generalForm.contact ?? ''}
-                        onChange={value => setGeneralForm(f => ({ ...f, contact: value }))}
-                        theme="snow"
-                        style={{ height: '200px', background: '#fff' }}
-                        placeholder="Agrega información de contacto, horarios, ubicación, etc."
-                        modules={{
-                          toolbar: [
-                            [{ 'header': [1, 2, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'image'],
-                            ['clean']
-                          ]
-                        }}
-                      />
-                    </Box>
-                  </Grid>
-                </Grid>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                  <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveGeneral} sx={{ borderRadius: 2, fontWeight: 600 }} disabled={generalLoading}>
-                    Guardar cambios
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </TabPanel>
-
-  {/* Métodos de pago */}
-  <TabPanel index={6} value={tab}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom color="primary.main">Métodos de pago</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Activa, edita, elimina o agrega métodos disponibles y añade información para tus clientes.
-                </Typography>
-                <TextField
-                  label="Información para el cliente"
-                  value={paymentForm.info ?? ''}
-                  onChange={e => setPaymentForm(f => ({ ...f, info: e.target.value }))}
-                  fullWidth
-                  multiline
-                  minRows={3}
-                  sx={{ mb: 2 }}
-                />
-                <Grid container spacing={2} sx={{ mb: 2 }}>
-                  <Grid item xs={12} sm={4}>
-                    <TextField label="Clave interna (ej: efectivo, transferencia)" value={newPayment.key ?? ''} onChange={e => setNewPayment(p => ({ ...p, key: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField label="Etiqueta para mostrar" value={newPayment.label ?? ''} onChange={e => setNewPayment(p => ({ ...p, label: e.target.value }))} fullWidth />
-                  </Grid>
-                  <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'stretch' }}>
-                    <Button variant="contained" color="primary" onClick={handleAddPaymentMethod} fullWidth>Agregar</Button>
-                  </Grid>
-                </Grid>
-                <List>
-                  {(paymentForm.methods || []).map(m => (
-                    <ListItem key={m.key} sx={{ alignItems: 'stretch', flexDirection: 'column' }}
-                      secondaryAction={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2">Activo</Typography>
-                          <Switch checked={m.enabled} onChange={(_, v) => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, enabled: v } : x) }))} />
-                          <IconButton aria-label="Eliminar" onClick={() => handleDeletePaymentMethod(m.key)}><Delete /></IconButton>
-                        </Box>
-                      }>
-                      <Grid container spacing={2} alignItems="flex-start" sx={{ width: '100%', mb: 1 }}>
-                        <Grid item xs={12} sm={4}>
-                          <TextField label="Clave interna" value={m.key ?? ''} onChange={e => handleEditPaymentMethod(m.key, 'key', e.target.value)} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} sm={8}>
-                          <TextField label="Etiqueta" value={m.label ?? ''} onChange={e => handleEditPaymentMethod(m.key, 'label', e.target.value)} fullWidth />
-                        </Grid>
-                        {(m.key === 'transferencia' || m.key === 'deposito') && (
-                          <>
-                            <Grid item xs={12}>
-                              <TextField
-                                label="Instrucciones para el cliente"
-                                value={m.instructions || ''}
-                                onChange={e => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, instructions: e.target.value } : x) }))}
-                                fullWidth
-                                multiline
-                                minRows={2}
-                                helperText="Se mostrará junto a los datos bancarios al confirmar el pedido"
-                              />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <TextField
-                                label="Información bancaria"
-                                value={m.bankInfo || ''}
-                                onChange={e => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, bankInfo: e.target.value } : x) }))}
-                                fullWidth
-                                multiline
-                                minRows={3}
-                                placeholder={"Banco Ejemplo\nCuenta Corriente: 123456789\nTitular: Nombre de la empresa\nRUC: 1234567890\nEmail: pagos@ejemplo.com"}
-                              />
-                            </Grid>
-                          </>
-                        )}
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField label="Nombre de la tienda" value={generalForm.name ?? ''} onChange={e => setGeneralForm(f => ({ ...f, name: e.target.value }))} fullWidth />
                       </Grid>
-                    </ListItem>
-                  ))}
-                </List>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                  <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSavePayment} sx={{ borderRadius: 2, fontWeight: 600 }} disabled={paymentLoading}>
-                    Guardar cambios
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </TabPanel>
+                      <Grid item xs={12} sm={6}>
+                        <TextField label="Email de contacto" value={generalForm.email ?? ''} onChange={e => setGeneralForm(f => ({ ...f, email: e.target.value }))} fullWidth />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField label="Teléfono" value={generalForm.phone ?? ''} onChange={e => setGeneralForm(f => ({ ...f, phone: e.target.value }))} fullWidth />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField label="Dirección" value={generalForm.address ?? ''} onChange={e => setGeneralForm(f => ({ ...f, address: e.target.value }))} fullWidth />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField label="Descripción" value={generalForm.description ?? ''} onChange={e => setGeneralForm(f => ({ ...f, description: e.target.value }))} fullWidth multiline minRows={2} />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                          Contenido página Nosotros
+                        </Typography>
+                        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
+                          <ReactQuill
+                            value={generalForm.about ?? ''}
+                            onChange={value => setGeneralForm(f => ({ ...f, about: value }))}
+                            theme="snow"
+                            style={{ height: '200px', background: '#fff' }}
+                            placeholder="Escribe la historia, misión, visión o valores de tu tienda."
+                            modules={{
+                              toolbar: [
+                                [{ 'header': [1, 2, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                              ]
+                            }}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                          Contenido página Contacto
+                        </Typography>
+                        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
+                          <ReactQuill
+                            value={generalForm.contact ?? ''}
+                            onChange={value => setGeneralForm(f => ({ ...f, contact: value }))}
+                            theme="snow"
+                            style={{ height: '200px', background: '#fff' }}
+                            placeholder="Agrega información de contacto, horarios, ubicación, etc."
+                            modules={{
+                              toolbar: [
+                                [{ 'header': [1, 2, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                              ]
+                            }}
+                          />
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                      <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveGeneral} sx={{ borderRadius: 2, fontWeight: 600 }} disabled={generalLoading}>
+                        Guardar cambios
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </TabPanel>
+
+          {/* Métodos de pago */}
+          <TabPanel index={6} value={tab}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={8}>
+                <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" fontWeight={600} gutterBottom color="primary.main">Métodos de pago</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Activa, edita, elimina o agrega métodos disponibles y añade información para tus clientes.
+                    </Typography>
+                    <TextField
+                      label="Información para el cliente"
+                      value={paymentForm.info ?? ''}
+                      onChange={e => setPaymentForm(f => ({ ...f, info: e.target.value }))}
+                      fullWidth
+                      multiline
+                      minRows={3}
+                      sx={{ mb: 2 }}
+                    />
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField label="Clave interna (ej: efectivo, transferencia)" value={newPayment.key ?? ''} onChange={e => setNewPayment(p => ({ ...p, key: e.target.value }))} fullWidth />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField label="Etiqueta para mostrar" value={newPayment.label ?? ''} onChange={e => setNewPayment(p => ({ ...p, label: e.target.value }))} fullWidth />
+                      </Grid>
+                      <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'stretch' }}>
+                        <Button variant="contained" color="primary" onClick={handleAddPaymentMethod} fullWidth>Agregar</Button>
+                      </Grid>
+                    </Grid>
+                    <List>
+                      {(paymentForm.methods || []).map(m => (
+                        <ListItem key={m.key} sx={{ alignItems: 'stretch', flexDirection: 'column' }}
+                          secondaryAction={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2">Activo</Typography>
+                              <Switch checked={m.enabled} onChange={(_, v) => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, enabled: v } : x) }))} />
+                              <IconButton aria-label="Eliminar" onClick={() => handleDeletePaymentMethod(m.key)}><Delete /></IconButton>
+                            </Box>
+                          }>
+                          <Grid container spacing={2} alignItems="flex-start" sx={{ width: '100%', mb: 1 }}>
+                            <Grid item xs={12} sm={4}>
+                              <TextField label="Clave interna" value={m.key ?? ''} onChange={e => handleEditPaymentMethod(m.key, 'key', e.target.value)} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} sm={8}>
+                              <TextField label="Etiqueta" value={m.label ?? ''} onChange={e => handleEditPaymentMethod(m.key, 'label', e.target.value)} fullWidth />
+                            </Grid>
+                            {(m.key === 'transferencia' || m.key === 'deposito') && (
+                              <>
+                                <Grid item xs={12}>
+                                  <TextField
+                                    label="Instrucciones para el cliente"
+                                    value={m.instructions || ''}
+                                    onChange={e => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, instructions: e.target.value } : x) }))}
+                                    fullWidth
+                                    multiline
+                                    minRows={2}
+                                    helperText="Se mostrará junto a los datos bancarios al confirmar el pedido"
+                                  />
+                                </Grid>
+                                <Grid item xs={12}>
+                                  <TextField
+                                    label="Información bancaria"
+                                    value={m.bankInfo || ''}
+                                    onChange={e => setPaymentForm(f => ({ ...f, methods: f.methods.map(x => x.key === m.key ? { ...x, bankInfo: e.target.value } : x) }))}
+                                    fullWidth
+                                    multiline
+                                    minRows={3}
+                                    placeholder={"Banco Ejemplo\nCuenta Corriente: 123456789\nTitular: Nombre de la empresa\nRUC: 1234567890\nEmail: pagos@ejemplo.com"}
+                                  />
+                                </Grid>
+                              </>
+                            )}
+                          </Grid>
+                        </ListItem>
+                      ))}
+                    </List>
+
+                    {paymentForm.methods.some(m => m.key === 'paypal') && (
+                      <Box sx={{ mt: 4, p: 3, bgcolor: '#f0f7ff', borderRadius: 2, border: '1px solid #2196f3' }}>
+                        <Typography variant="h6" fontWeight={600} gutterBottom color="primary.main">
+                          Configuración de PayPal
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Configura tus credenciales de PayPal para recibir pagos directamente en tu cuenta.
+                        </Typography>
+                        <Box sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
+                          <Typography variant="body2" fontWeight={600} gutterBottom>
+                            Cómo obtener las credenciales:
+                          </Typography>
+                          <Typography variant="body2">
+                            1. Ve a developer.paypal.com/dashboard
+                          </Typography>
+                          <Typography variant="body2">
+                            2. Crea una app en Apps y Credentials
+                          </Typography>
+                          <Typography variant="body2">
+                            3. Copia el Client ID y Secret
+                          </Typography>
+                          <Typography variant="body2">
+                            4. Para pruebas usa Sandbox, para producción usa Live
+                          </Typography>
+                        </Box>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <TextField
+                              label="PayPal Client ID"
+                              value={paymentForm.paypalClientId || ''}
+                              onChange={e => setPaymentForm(f => ({ ...f, paypalClientId: e.target.value }))}
+                              fullWidth
+                              placeholder="Ej: AeB1234567890abcdefghijklmnopqrstuvwxyz"
+                              helperText="El Client ID que obtuviste de PayPal Developer Dashboard"
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <TextField
+                              label="PayPal Client Secret"
+                              type="password"
+                              value={paymentForm.paypalClientSecret || ''}
+                              onChange={e => setPaymentForm(f => ({ ...f, paypalClientSecret: e.target.value }))}
+                              fullWidth
+                              placeholder="Mantén esto en secreto"
+                              helperText="El Secret que obtuviste de PayPal Developer Dashboard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              select
+                              label="Modo de PayPal"
+                              value={paymentForm.paypalMode || 'sandbox'}
+                              onChange={e => setPaymentForm(f => ({ ...f, paypalMode: e.target.value as 'sandbox' | 'live' }))}
+                              fullWidth
+                              helperText="Usa Sandbox para pruebas, Live para producción"
+                            >
+                              <MenuItem value="sandbox">Sandbox (Pruebas)</MenuItem>
+                              <MenuItem value="live">Live (Producción)</MenuItem>
+                            </TextField>
+                          </Grid>
+                        </Grid>
+                        <Box sx={{ mt: 2, p: 2, bgcolor: '#fff3e0', borderRadius: 1 }}>
+                          <Typography variant="body2" fontWeight={600}>
+                            Importante:
+                          </Typography>
+                          <Typography variant="body2">
+                            Asegúrate de guardar los cambios después de configurar PayPal. Los pagos irán directamente a la cuenta de PayPal asociada con estas credenciales.
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                      <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSavePayment} sx={{ borderRadius: 2, fontWeight: 600 }} disabled={paymentLoading}>
+                        Guardar cambios
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </TabPanel>
         </CardContent>
       </Card>
 
 
-    {/* Marca */}
-  <TabPanel index={1} value={tab}>
-  <Grid container spacing={3}>
+      {/* Marca */}
+      <TabPanel index={1} value={tab}>
+        <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
               <CardContent>
@@ -658,7 +731,7 @@ const StoreSettings: React.FC = () => {
                     sx={{ mt: 2, maxWidth: 320 }}
                   />
                 </Box>
-                
+
               </CardContent>
             </Card>
           </Grid>
@@ -708,7 +781,7 @@ const StoreSettings: React.FC = () => {
                     sx={{ mt: 2, maxWidth: 320 }}
                   />
                 </Box>
-                
+
               </CardContent>
             </Card>
           </Grid>
@@ -722,8 +795,8 @@ const StoreSettings: React.FC = () => {
         </Grid>
       </TabPanel>
 
-    {/* Políticas */}
-  <TabPanel index={2} value={tab}>
+      {/* Políticas */}
+      <TabPanel index={2} value={tab}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={5}>
             <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -771,7 +844,7 @@ const StoreSettings: React.FC = () => {
                           toolbar: [
                             [{ 'header': [1, 2, false] }],
                             ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                             ['link', 'image'],
                             ['clean']
                           ]
@@ -793,8 +866,8 @@ const StoreSettings: React.FC = () => {
         </Grid>
       </TabPanel>
 
-    {/* Carrusel */}
-  <TabPanel index={3} value={tab}>
+      {/* Carrusel */}
+      <TabPanel index={3} value={tab}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -888,8 +961,8 @@ const StoreSettings: React.FC = () => {
         </Grid>
       </TabPanel>
 
-    {/* Redes Sociales */}
-  <TabPanel index={4} value={tab}>
+      {/* Redes Sociales */}
+      <TabPanel index={4} value={tab}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -919,8 +992,8 @@ const StoreSettings: React.FC = () => {
       </TabPanel>
 
 
-  {/* Envíos */}
-  <TabPanel index={5} value={tab}>
+      {/* Envíos */}
+      <TabPanel index={5} value={tab}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Card sx={{ borderRadius: 3, boxShadow: 2, mb: 3 }}>
@@ -1024,15 +1097,15 @@ const StoreSettings: React.FC = () => {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <TextField 
+                    <TextField
                       size="small"
-                      label="Región" 
-                      placeholder="Ecuador / Pichincha / Quito" 
-                      value={newRate.region} 
-                      onChange={e => setNewRate(r => ({ ...r, region: e.target.value }))} 
+                      label="Región"
+                      placeholder="Ecuador / Pichincha / Quito"
+                      value={newRate.region}
+                      onChange={e => setNewRate(r => ({ ...r, region: e.target.value }))}
                       fullWidth
                       error={!newRate.region.trim()}
-                      helperText={!newRate.region.trim() ? 'Requerido' : ' '} 
+                      helperText={!newRate.region.trim() ? 'Requerido' : ' '}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2.5}>
@@ -1048,12 +1121,12 @@ const StoreSettings: React.FC = () => {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <TextField 
+                    <TextField
                       size="small"
-                      label="Precio" 
-                      type="text" 
-                      inputMode="decimal" 
-                      inputProps={{ inputMode: 'decimal', pattern: '[0-9]*[.,]?[0-9]*' }} 
+                      label="Precio"
+                      type="text"
+                      inputMode="decimal"
+                      inputProps={{ inputMode: 'decimal', pattern: '[0-9]*[.,]?[0-9]*' }}
                       value={newRatePriceInput}
                       onChange={e => setNewRatePriceInput(onlyDecimalString(e.target.value))}
                       onBlur={() => setNewRate(r => ({ ...r, price: parseDecimal(newRatePriceInput) }))}
@@ -1063,13 +1136,13 @@ const StoreSettings: React.FC = () => {
                     <Box sx={{ height: '21px', display: { xs: 'none', sm: 'block' } }} />
                   </Grid>
                   <Grid item xs={12} sm={2}>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      onClick={handleAddRate} 
-                      fullWidth 
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleAddRate}
+                      fullWidth
                       size="small"
-                      disabled={!newRate.region.trim()} 
+                      disabled={!newRate.region.trim()}
                       sx={{ height: 40, mb: { xs: 0, sm: '21px' } }}
                     >
                       Agregar
@@ -1115,14 +1188,14 @@ const StoreSettings: React.FC = () => {
                           </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                          <TextField 
+                          <TextField
                             size="small"
-                            label="Región" 
-                            value={r.region} 
-                            onChange={e => handleUpdateRate(r.id, { region: e.target.value })} 
+                            label="Región"
+                            value={r.region}
+                            onChange={e => handleUpdateRate(r.id, { region: e.target.value })}
                             fullWidth
                             error={!r.region.trim()}
-                            helperText={!r.region.trim() ? 'Requerido' : ' '} 
+                            helperText={!r.region.trim() ? 'Requerido' : ' '}
                           />
                         </Grid>
                         <Grid item xs={12} sm={2.5}>
@@ -1175,10 +1248,10 @@ const StoreSettings: React.FC = () => {
         </Grid>
       </TabPanel>
       {/* Ayuda Envíos */}
-      <Dialog 
-        open={helpOpen} 
-        onClose={() => setHelpOpen(false)} 
-        maxWidth="sm" 
+      <Dialog
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        maxWidth="sm"
         fullWidth
         sx={{
           '& .MuiDialog-paper': {
@@ -1190,11 +1263,11 @@ const StoreSettings: React.FC = () => {
         }}
       >
         <DialogTitle sx={{ pb: 1, px: { xs: 2, sm: 3 } }}>
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
-              fontWeight: 600, 
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              fontWeight: 600,
               fontSize: { xs: '1.1rem', sm: '1.25rem' },
               lineHeight: 1.4,
               whiteSpace: 'normal',
@@ -1203,10 +1276,10 @@ const StoreSettings: React.FC = () => {
             Cómo funcionan las tarifas de envío
           </Typography>
         </DialogTitle>
-        <DialogContent 
-          dividers 
-          sx={{ 
-            px: { xs: 2, sm: 3 }, 
+        <DialogContent
+          dividers
+          sx={{
+            px: { xs: 2, sm: 3 },
             py: 2,
             overflowY: 'auto',
             overflowX: 'hidden',
@@ -1214,10 +1287,10 @@ const StoreSettings: React.FC = () => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2 } }}>
             <Box>
-              <Typography 
-                variant="subtitle2" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
                   fontWeight: 600,
                   fontSize: { xs: '0.95rem', sm: '1rem' },
                   lineHeight: 1.4,
@@ -1226,10 +1299,10 @@ const StoreSettings: React.FC = () => {
               >
                 1) Crea transportistas
               </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
                   fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   lineHeight: 1.6,
                   whiteSpace: 'normal',
@@ -1240,10 +1313,10 @@ const StoreSettings: React.FC = () => {
             </Box>
 
             <Box>
-              <Typography 
-                variant="subtitle2" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
                   fontWeight: 600,
                   fontSize: { xs: '0.95rem', sm: '1rem' },
                   lineHeight: 1.4,
@@ -1252,10 +1325,10 @@ const StoreSettings: React.FC = () => {
               >
                 2) Define tarifas por región
               </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
                   fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   lineHeight: 1.6,
                   whiteSpace: 'normal',
@@ -1266,10 +1339,10 @@ const StoreSettings: React.FC = () => {
             </Box>
 
             <Box>
-              <Typography 
-                variant="subtitle2" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
                   fontWeight: 600,
                   fontSize: { xs: '0.95rem', sm: '1rem' },
                   lineHeight: 1.4,
@@ -1278,10 +1351,10 @@ const StoreSettings: React.FC = () => {
               >
                 3) Configura envío gratis y costo estándar
               </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
                   fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   lineHeight: 1.6,
                   whiteSpace: 'normal',
@@ -1292,10 +1365,10 @@ const StoreSettings: React.FC = () => {
             </Box>
 
             <Box>
-              <Typography 
-                variant="subtitle2" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
                   fontWeight: 600,
                   fontSize: { xs: '0.95rem', sm: '1rem' },
                   lineHeight: 1.4,
@@ -1304,10 +1377,10 @@ const StoreSettings: React.FC = () => {
               >
                 4) Checkout de la tienda
               </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
                   fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   lineHeight: 1.6,
                   whiteSpace: 'normal',
@@ -1317,16 +1390,16 @@ const StoreSettings: React.FC = () => {
               </Typography>
             </Box>
 
-            <Box sx={{ 
-              bgcolor: 'action.hover', 
+            <Box sx={{
+              bgcolor: 'action.hover',
               p: { xs: 1.5, sm: 2 },
-              borderRadius: 1, 
-              borderLeft: 3, 
-              borderColor: 'primary.main' 
+              borderRadius: 1,
+              borderLeft: 3,
+              borderColor: 'primary.main'
             }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                sx={{
                   fontWeight: 500,
                   fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   lineHeight: 1.6,
@@ -1339,18 +1412,18 @@ const StoreSettings: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
-          <Button 
-            onClick={() => setHelpOpen(false)} 
-            autoFocus 
-            variant="contained" 
-            fullWidth 
+          <Button
+            onClick={() => setHelpOpen(false)}
+            autoFocus
+            variant="contained"
+            fullWidth
             sx={{ display: { xs: 'block', sm: 'none' } }}
           >
             Aceptar
           </Button>
-          <Button 
-            onClick={() => setHelpOpen(false)} 
-            autoFocus 
+          <Button
+            onClick={() => setHelpOpen(false)}
+            autoFocus
             sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
           >
             Aceptar

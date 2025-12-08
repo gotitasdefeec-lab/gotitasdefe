@@ -7,9 +7,10 @@ import { CarouselModule } from '../carousel/carousel.module';
 import { SalesModule } from '../sales/sales.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { PoliciesModule } from '../policies/policies.module';
+import { PaypalModule } from '../paypal/paypal.module';
 
 @Module({
-  imports: [ProductsModule, StoreModule, CategoriesModule, CarouselModule, SalesModule, InventoryModule],
+  imports: [ProductsModule, StoreModule, CategoriesModule, CarouselModule, SalesModule, InventoryModule, PaypalModule],
   controllers: [PublicController],
 })
-export class PublicModule {}
+export class PublicModule { }

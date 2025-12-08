@@ -27,8 +27,8 @@ export default function PaymentMethodSelector({ value, onChange, methods }: Paym
             className={`
               relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-colors
               hover:bg-gray-50
-              ${value === method.key 
-                ? 'border-blue-500 bg-blue-50' 
+              ${value === method.key
+                ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
               }
             `}
@@ -51,6 +51,7 @@ export default function PaymentMethodSelector({ value, onChange, methods }: Paym
                 {method.key === 'efectivo' && <span role="img" aria-label="Efectivo">💵</span>}
                 {method.key === 'transferencia' && <span role="img" aria-label="Transferencia">🏦</span>}
                 {method.key === 'tarjeta' && <span role="img" aria-label="Tarjeta">💳</span>}
+                {method.key === 'paypal' && <span role="img" aria-label="PayPal" className="text-2xl">🅿️</span>}
               </div>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
@@ -63,12 +64,13 @@ export default function PaymentMethodSelector({ value, onChange, methods }: Paym
                   {method.key === 'efectivo' && 'Paga cuando recibas tu pedido'}
                   {method.key === 'transferencia' && 'Transfiere directamente a nuestra cuenta'}
                   {method.key === 'tarjeta' && 'Visa, MasterCard, American Express'}
+                  {method.key === 'paypal' && 'Paga de forma segura con PayPal o tarjeta'}
                 </p>
               </div>
               <div className={`
                 w-5 h-5 border-2 rounded-full flex items-center justify-center
-                ${value === method.key 
-                  ? 'border-blue-500 bg-blue-500' 
+                ${value === method.key
+                  ? 'border-blue-500 bg-blue-500'
                   : 'border-gray-300 bg-white'
                 }
               `}>
