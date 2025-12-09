@@ -201,11 +201,14 @@ model StoreShipping {
 }
 
 model StorePayment {
-  id        Int      @id @default(1)
-  info      String?
-  methods   Json     @default("[]")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int      @id @default(1)
+  info               String?
+  methods            Json     @default("[]")
+  paypalClientId     String?  @map("paypal_client_id")
+  paypalClientSecret String?  @map("paypal_client_secret")
+  paypalMode         String?  @default("sandbox") @map("paypal_mode")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@map("store_payment")
 }

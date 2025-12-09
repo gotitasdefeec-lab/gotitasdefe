@@ -1,6 +1,8 @@
 
 import { getStoreGeneral } from '../../services/storeGeneralService';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AboutPage() {
   const general = await getStoreGeneral();
 
@@ -19,7 +21,7 @@ export default async function AboutPage() {
       } else if (line === '') {
         if (inList) { html += '</ul>'; inList = false; }
         // Solo agrega salto de párrafo si la línea anterior no era vacía
-        if (i > 0 && lines[i-1].trim() !== '') html += '<p></p>';
+        if (i > 0 && lines[i - 1].trim() !== '') html += '<p></p>';
       } else {
         if (inList) { html += '</ul>'; inList = false; }
         html += `<p>${line}</p>`;

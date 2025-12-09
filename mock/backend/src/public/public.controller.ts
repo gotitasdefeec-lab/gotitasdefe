@@ -332,22 +332,23 @@ export class PublicController {
   @ApiResponse({ status: 400, description: 'Invalid request or payment failed' })
   async capturePayPalOrder(@Param('orderId') paypalOrderId: string, @Body() body?: any) {
     try {
+      // Check if order data exists BEFORE capturing payment
+      const orderData = this.paypalOrderDataMap.get(paypalOrderId);
+
+      if (!orderData) {
+        // Order already processed or doesn't exist
+        throw new BadRequestException('Order already processed or not found. Please create a new order.');
+      }
+
+      // Clean up stored data immediately to prevent duplicate processing
+      this.paypalOrderDataMap.delete(paypalOrderId);
+
       // Capture the PayPal payment
       const captureResult = await this.paypalService.captureOrder(paypalOrderId);
 
       if (captureResult.status !== 'COMPLETED') {
         throw new BadRequestException('Payment was not completed');
       }
-
-      // Retrieve stored order data
-      const orderData = this.paypalOrderDataMap.get(paypalOrderId);
-
-      if (!orderData) {
-        throw new BadRequestException('Order data not found. Please try creating a new order.');
-      }
-
-      // Clean up stored data
-      this.paypalOrderDataMap.delete(paypalOrderId);
 
       // Compute shipping meta if present
       const shippingMeta = (() => {

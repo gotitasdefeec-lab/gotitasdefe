@@ -51,6 +51,17 @@ export class PaypalService {
                     },
                 },
             ],
+            payer: {
+                address: {
+                    country_code: 'EC', // Ecuador como país predeterminado
+                },
+            },
+            application_context: {
+                shipping_preference: 'NO_SHIPPING', // No pedir dirección de envío
+                user_action: 'PAY_NOW', // Mostrar "Pagar ahora" en lugar de "Continuar"
+                brand_name: 'Tu Tienda', // Nombre de tu tienda
+                locale: 'es-EC', // Idioma español de Ecuador
+            },
         });
 
         try {
