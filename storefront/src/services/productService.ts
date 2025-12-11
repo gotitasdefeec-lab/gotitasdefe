@@ -5,10 +5,8 @@ export const productService = {
   // Get all products (public endpoint)
   async getProducts(): Promise<Product[]> {
     try {
-      console.log('Fetching products from API...');
-  const response = await publicApi.get('/public/products');
-      console.log('Raw API response:', response);
-      
+      const response = await publicApi.get('/public/products');
+
       let products = [];
       if (Array.isArray(response.data)) {
         products = response.data;
@@ -18,9 +16,9 @@ export const productService = {
         console.warn('Unexpected API response format:', response.data);
         return [];
       }
-      
+
       console.log(`Successfully fetched ${products.length} products`);
-      
+
       // Asegurar que todos los productos tienen las propiedades necesarias
       const processedProducts = products.map((product: any) => ({
         ...product,
@@ -34,8 +32,7 @@ export const productService = {
         tags: Array.isArray(product.tags) ? product.tags : [],
         createdAt: product.createdAt || new Date().toISOString()
       }));
-      
-      console.log('Processed products:', processedProducts.slice(0, 2)); // Solo mostrar los primeros 2 para evitar logs largos
+
       return processedProducts;
     } catch (error: any) {
       console.error('Error fetching products:', error);
@@ -62,7 +59,7 @@ export const productService = {
   // Get featured products
   async getFeaturedProducts(): Promise<Product[]> {
     try {
-  const response = await publicApi.get('/public/products/featured');
+      const response = await publicApi.get('/public/products/featured');
       return Array.isArray(response.data) ? response.data : response.data?.data || [];
     } catch (error) {
       console.error('Error fetching featured products:', error);
@@ -73,7 +70,7 @@ export const productService = {
   // Get products by category
   async getProductsByCategory(categoryName: string): Promise<Product[]> {
     try {
-  const response = await publicApi.get(`/public/categories/${categoryName}/products`);
+      const response = await publicApi.get(`/public/categories/${categoryName}/products`);
       return Array.isArray(response.data) ? response.data : response.data?.data || [];
     } catch (error) {
       console.error('Error fetching products by category:', error);
@@ -85,16 +82,16 @@ export const productService = {
   async searchProductsAutocomplete(query: string, limit: number = 6): Promise<Product[]> {
     try {
       if (!query.trim()) return [];
-      
+
       const allProducts = await this.getProducts();
       const lowerQuery = query.toLowerCase();
-      
-      const filteredProducts = allProducts.filter(product => 
+
+      const filteredProducts = allProducts.filter(product =>
         product.name.toLowerCase().includes(lowerQuery) ||
         product.description.toLowerCase().includes(lowerQuery) ||
         product.sku.toLowerCase().includes(lowerQuery)
       );
-      
+
       // Return only the first 'limit' products for autocomplete
       return filteredProducts.slice(0, limit);
     } catch (error) {
@@ -108,7 +105,7 @@ export const productService = {
     try {
       const products = await this.getProducts();
       const lowerQuery = query.toLowerCase();
-      return products.filter(product => 
+      return products.filter(product =>
         product.name.toLowerCase().includes(lowerQuery) ||
         product.description?.toLowerCase().includes(lowerQuery) ||
         product.sku.toLowerCase().includes(lowerQuery)
@@ -125,9 +122,9 @@ export const categoryService = {
   async getCategories(): Promise<Category[]> {
     try {
       console.log('Fetching categories from API...');
-  const response = await publicApi.get('/public/categories');
+      const response = await publicApi.get('/public/categories');
       console.log('Categories API response:', response);
-      
+
       let categories = [];
       if (Array.isArray(response.data)) {
         categories = response.data;
@@ -137,7 +134,7 @@ export const categoryService = {
         console.warn('Unexpected categories API response format:', response.data);
         return [];
       }
-      
+
       console.log(`Successfully fetched ${categories.length} categories`);
       return categories;
     } catch (error: any) {
