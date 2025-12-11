@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /account
+
+Sitemap: https://gotasdefe.com/sitemap.xml

@@ -1,11 +1,12 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import "./globals.css";
 import Layout from '@/components/layout/Layout';
 import ClientProviders from '@/components/layout/ClientProviders';
 import { Inter } from 'next/font/google';
 
 const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
-const inter = Inter({ subsets: ['latin'], display: 'swap', weight: ['300','400','500','600','700'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap', weight: ['300', '400', '500', '600', '700'] });
 
 async function getStoreConfig() {
   try {
@@ -36,6 +37,46 @@ async function getPolicies() {
   } catch (_) {
     return [] as any[];
   }
+}
+
+
+export async function generateMetadata(): Promise<Metadata> {
+  const storeConfig = await getStoreConfig();
+  const general = storeConfig?.general || {};
+  const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://gotasdefe.com';
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title: {
+      default: general.name || 'Gotitas de Fe',
+      template: `%s | ${general.name || 'Gotitas de Fe'}`
+    },
+    description: general.description || 'Tienda en línea de productos religiosos y espirituales.',
+    keywords: ['tienda', 'ecommerce', 'religioso', 'espiritual', 'gotitas de fe'],
+    authors: [{ name: general.name }],
+    openGraph: {
+      type: 'website',
+      locale: 'es_EC',
+      url: baseUrl,
+      title: general.name || 'Gotitas de Fe',
+      description: general.description || 'Tienda en línea de productos religiosos y espirituales.',
+      siteName: general.name || 'Gotitas de Fe',
+    },
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await productService.getProduct(id);
   if (!product) return {};
   return {
-    title: `${product.name} | Tienda`,
+    title: product.name,
     description: product.description?.replace(/<[^>]+>/g, '').slice(0, 160) || undefined,
     openGraph: {
       title: product.name,
