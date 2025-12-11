@@ -29,7 +29,7 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     const skipRedirect = error?.config?.headers?.['X-Skip-Auth-Redirect'] === 'true';
-    
+
     if ((status === 401 || status === 403) && !skipRedirect) {
       // Limpiar sesión básica
       localStorage.removeItem('auth_token');
@@ -75,20 +75,20 @@ export const inventoryApi = {
     try {
       const res = await api.get(`/inventory?productId=${productId}`);
       inv = res.data || null;
-    } catch {}
-    
+    } catch { }
+
     // Si no existe el inventory, intentar con el id directo
     if (!inv) {
       try {
         const resById = await api.get(`/inventory/${productId}`);
         inv = resById.data || null;
-      } catch {}
+      } catch { }
     }
-    
+
     if (!inv || !inv.id) {
       throw new Error('Inventario no encontrado para este producto');
     }
-    
+
     // Nest usa PUT /inventory/:id con body { quantity }
     return api.put(`/inventory/${inv.id}`, { quantity });
   },
@@ -101,24 +101,24 @@ export const inventoryApi = {
     try {
       const res = await api.get(`/inventory?productId=${idOrProductId}`);
       inv = res.data || null;
-    } catch {}
-    
+    } catch { }
+
     // O por id directo
     if (!inv) {
       try {
         const resById = await api.get(`/inventory/${idOrProductId}`);
         inv = resById.data || null;
-      } catch {}
+      } catch { }
     }
-    
+
     if (!inv) {
       throw new Error('Inventario no encontrado');
     }
-    
+
     // Nest usa PATCH /inventory/:id/movement
     return api.patch(`/inventory/${inv.id}/movement`, movement);
   },
-  getMovements: (productId: string) => 
+  getMovements: (productId: string) =>
     api.get(`/inventory/${productId}/movements`),
 };
 
@@ -132,6 +132,7 @@ export const salesApi = {
   updateStatus: (id: string | number, status: string) => api.patch(`/sales/${id}`, { status }),
   delete: (id: string | number) => api.delete(`/sales/${id}`),
   cancel: (id: string | number, reason?: string) => api.patch(`/sales/${id}/cancel`, { reason }),
+  refund: (id: string | number) => api.post(`/sales/${id}/refund`),
 };
 
 // Usuarios

@@ -55,7 +55,7 @@ const Sales = () => {
   useEffect(() => {
     getStoreShipping().then(cfg => {
       setFreeShippingMin(Number(cfg.freeShippingMin) || 0);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,7 +114,7 @@ const Sales = () => {
       const res = await productsApi.getAll();
       const productsData = Array.isArray(res.data) ? res.data : [];
       setProducts(productsData as any[]);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -157,7 +157,7 @@ const Sales = () => {
     setShippingEta(row.shippingEta || '');
     setTaxPercent(row.taxPercent ?? 0);
     setDiscountPercent(row.discountPercent ?? 0);
-    
+
     setLocalAttachments(Array.isArray(row.attachments) ? row.attachments : []);
     setOpenDetail(true);
   };
@@ -179,7 +179,26 @@ const Sales = () => {
       await salesApi.update(row.id, payload);
       setSales(prev => prev.map(s => s.id === row.id ? { ...s, status } : s));
       if (selected && selected.id === row.id) setSelected({ ...selected, status, ...(payload.customerEmail ? { customerEmail: payload.customerEmail } : {}) });
-    } catch (e) {}
+    } catch (e) { }
+  };
+
+  const handleRefund = async () => {
+    if (!selected?.id) return;
+    if (!window.confirm('¿Estás seguro de que deseas reembolsar este pedido? Esta acción procesará el reembolso en PayPal y marcará el pedido como reembolsado.')) return;
+
+    // setLoading(true); // setLoading afecta toda la tabla, mejor solo mostrar feedback
+    try {
+      await salesApi.refund(selected.id);
+
+      const newStatus = 'refunded'; // o 'cancelled' si el backend forza eso
+      setSales(prev => prev.map(s => s.id === selected.id ? { ...s, status: newStatus } : s));
+      setSelected({ ...selected, status: newStatus });
+      setCopySnack({ open: true, message: 'Reembolso procesado exitosamente en PayPal', severity: 'success' });
+    } catch (e: any) {
+      console.error(e);
+      const msg = e?.response?.data?.message || 'Error al procesar el reembolso';
+      setCopySnack({ open: true, message: msg, severity: 'error' });
+    }
   };
 
   const exportCSV = () => {
@@ -213,7 +232,7 @@ const Sales = () => {
   const [shippingPhone, setShippingPhone] = useState('');
   const [taxPercent, setTaxPercent] = useState<number>(0);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
-  
+
   // Extrae la ciudad del campo dirección si no está shippingRegion
   function extractCityFromAddress(address: string): string {
     if (!address) return '';
@@ -310,7 +329,7 @@ const Sales = () => {
       a.href = url;
       a.download = att.name || 'archivo';
       a.click();
-    } catch {}
+    } catch { }
   };
 
   // Construye un payload seguro para el backend (evita campos no soportados)
@@ -359,7 +378,7 @@ const Sales = () => {
         const res = await salesApi.create(payload);
         const created = res.data;
         // Refrescar productos desde backend para mostrar stock actualizado
-          await fetchProducts();
+        await fetchProducts();
         setSales(prev => [{ ...created, ...payload, id: created.id }, ...prev]);
         setSelected({ ...created, ...payload, id: created.id });
         setCopySnack({ open: true, message: 'Pedido creado y stock descontado', severity: 'success' });
@@ -389,7 +408,7 @@ const Sales = () => {
             await salesApi.updateStatus(selected.id, selected.status || 'pending');
           }
         }
-          await fetchProducts();
+        await fetchProducts();
         setSales(prev => prev.map(s => s.id === selected.id ? { ...s, ...payload } : s));
         setSelected({ ...selected, ...payload });
         setCopySnack({ open: true, message: 'Pedido actualizado', severity: 'success' });
@@ -410,7 +429,7 @@ const Sales = () => {
       }
       const serverMsg = e?.response?.data?.message || e?.response?.data?.error || e?.message;
       const code = e?.response?.status ? ` (HTTP ${e.response.status})` : '';
-      setCopySnack({ open: true, message: `Error${code}: ${serverMsg || 'No se pudo guardar el pedido'}` , severity: 'error' });
+      setCopySnack({ open: true, message: `Error${code}: ${serverMsg || 'No se pudo guardar el pedido'}`, severity: 'error' });
     }
   };
 
@@ -438,7 +457,7 @@ const Sales = () => {
   ${(selected?.shippingRegion || extractCityFromAddress(selected?.shippingAddress)) ? `<p><strong>Ciudad:</strong> ${selected?.shippingRegion || extractCityFromAddress(selected?.shippingAddress)}</p>` : ''}
   ${selected?.customerPostalCode ? `<p><strong>Código Postal:</strong> ${selected.customerPostalCode}</p>` : ''}
   ${selected?.customerCountry ? `<p><strong>País:</strong> ${selected.customerCountry}</p>` : ''}
-        ${shippingMethodName ? `<p><strong>Método de envío:</strong> ${shippingMethodName} ${Number(shippingCost||0) ? `( $${Number(shippingCost).toFixed(2)} )` : ''}</p>` : ''}
+        ${shippingMethodName ? `<p><strong>Método de envío:</strong> ${shippingMethodName} ${Number(shippingCost || 0) ? `( $${Number(shippingCost).toFixed(2)} )` : ''}</p>` : ''}
         ${(selected?.shippingRegion || extractCityFromAddress(selected?.shippingAddress)) ? `<p><strong>Ciudad:</strong> ${selected?.shippingRegion || extractCityFromAddress(selected?.shippingAddress)}</p>` : ''}
         ${selected?.shippingCarrier ? `<p><strong>Carrier:</strong> ${selected.shippingCarrier}</p>` : ''}
         ${selected?.shippingScope ? `<p><strong>Alcance:</strong> ${selected.shippingScope}</p>` : ''}
@@ -458,9 +477,9 @@ const Sales = () => {
         </table>
         <div style="margin-top:12px; text-align:right;">
           <div>Subtotal: $${subtotal.toFixed(2)}</div>
-          <div>IVA (${taxPercent}%): $${(subtotal*Number(taxPercent)/100).toFixed(2)}</div>
-          <div>Descuento (${discountPercent}%): -$${(subtotal*Number(discountPercent)/100).toFixed(2)}</div>
-          <div>Envío: $${Number(shippingCost||0).toFixed(2)}</div>
+          <div>IVA (${taxPercent}%): $${(subtotal * Number(taxPercent) / 100).toFixed(2)}</div>
+          <div>Descuento (${discountPercent}%): -$${(subtotal * Number(discountPercent) / 100).toFixed(2)}</div>
+          <div>Envío: $${Number(shippingCost || 0).toFixed(2)}</div>
           <h3>Total: $${computedTotal.toFixed(2)}</h3>
         </div>
         <script>window.print();</script>
@@ -483,7 +502,7 @@ const Sales = () => {
             const resProd = await productsApi.getById(String(item.productId));
             // Nest devuelve el objeto en res.data
             baseQty = Number(resProd.data?.stock ?? 0);
-          } catch {}
+          } catch { }
         }
         const newStock = baseQty + Number(item.quantity);
         // 3) Actualizar inventario (crea si no existe)
@@ -502,7 +521,7 @@ const Sales = () => {
               await productsApi.update(String(dataProd.id), { ...dataProd, stock: newStock });
             }
           }
-        } catch {}
+        } catch { }
       } catch (err) {
         // Continuar con los siguientes items aunque alguno falle
         console.error('Error restaurando stock para item', item?.productId, err);
@@ -523,31 +542,31 @@ const Sales = () => {
         setSelected(null);
         setOpenDetail(false);
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   return (
     <Box>
-      <Box sx={{ 
-        display: 'flex', 
+      <Box sx={{
+        display: 'flex',
         justifyContent: 'space-between',
         alignItems: { xs: 'flex-start', sm: 'center' },
         mb: { xs: 2, sm: 3 },
         gap: { xs: 1.5, sm: 2 },
         flexDirection: { xs: 'column', sm: 'row' }
       }}>
-        <Typography 
-          variant="h4" 
-          sx={{ 
+        <Typography
+          variant="h4"
+          sx={{
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
             fontWeight: 600
           }}
         >
           Pedidos
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           size="small"
           onClick={() => {
             setSelected({
@@ -564,7 +583,7 @@ const Sales = () => {
               shippingPhone: '',
               taxPercent: 0,
               discountPercent: 0,
-              
+
               attachments: [],
             });
             setEditCustomer('');
@@ -581,11 +600,11 @@ const Sales = () => {
             setShippingEta('');
             setTaxPercent(0);
             setDiscountPercent(0);
-            
+
             setLocalAttachments([]);
             setOpenDetail(true);
           }}
-          sx={{ 
+          sx={{
             minHeight: { xs: 36, sm: 42 },
             fontSize: { xs: '0.8rem', sm: '0.875rem' },
             whiteSpace: 'nowrap',
@@ -599,7 +618,7 @@ const Sales = () => {
       {error && (
         <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
           <Paper sx={{ p: { xs: 1.5, sm: 2 } }}>
-            <Typography 
+            <Typography
               color="error"
               sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
             >
@@ -610,12 +629,12 @@ const Sales = () => {
       )}
 
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Paper sx={{ 
-          p: { xs: 1.5, sm: 2 }, 
-          display: 'flex', 
-          gap: { xs: 1, sm: 2 }, 
-          alignItems: 'center', 
-          flexWrap: 'wrap' 
+        <Paper sx={{
+          p: { xs: 1.5, sm: 2 },
+          display: 'flex',
+          gap: { xs: 1, sm: 2 },
+          alignItems: 'center',
+          flexWrap: 'wrap'
         }}>
           <TextField
             select
@@ -623,7 +642,7 @@ const Sales = () => {
             size="small"
             value={statusFilter}
             onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
-            sx={{ 
+            sx={{
               minWidth: { xs: '100%', sm: 120 },
               '& input': { fontSize: { xs: '0.9rem', sm: '1rem' } }
             }}
@@ -638,19 +657,19 @@ const Sales = () => {
             size="small"
             value={search}
             onChange={(e) => { setPage(1); setSearch(e.target.value); }}
-            sx={{ 
+            sx={{
               minWidth: { xs: '100%', sm: 200 },
               flex: { sm: 1 },
               '& input': { fontSize: { xs: '0.9rem', sm: '1rem' } }
             }}
           />
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             gap: { xs: 0.5, sm: 1 },
             ml: { sm: 'auto' }
           }}>
             <Tooltip title="Refrescar">
-              <IconButton 
+              <IconButton
                 onClick={() => window.location.reload()}
                 size="small"
                 sx={{ p: { xs: 0.75, sm: 1 } }}
@@ -659,7 +678,7 @@ const Sales = () => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Exportar CSV">
-              <IconButton 
+              <IconButton
                 onClick={exportCSV}
                 size="small"
                 sx={{ p: { xs: 0.75, sm: 1 } }}
@@ -678,200 +697,200 @@ const Sales = () => {
           </Typography>
         </Paper>
       ) : (
-      <TableContainer component={Paper} sx={{ 
-        mb: { xs: 2, sm: 3 }, 
-        overflowX: 'auto', 
-        borderRadius: { xs: 2, sm: 3 }, 
-        boxShadow: { xs: 1, sm: 3 } 
-      }}>
-        <Table size="small" sx={{ minWidth: { xs: 600, sm: 700, md: 800 } }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ 
-                minWidth: { xs: 40, sm: 60 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 }
-              }}>
-                ID
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 80, sm: 120 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 },
-                display: { xs: 'none', sm: 'table-cell' }
-              }}>
-                Fecha
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 100, sm: 160 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 }
-              }}>
-                Cliente
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 70, sm: 110 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 },
-                display: { xs: 'none', md: 'table-cell' }
-              }}>
-                Cédula
-              </TableCell>
-              <TableCell align="right" sx={{ 
-                minWidth: { xs: 60, sm: 90 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 }
-              }}>
-                Total
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 100, sm: 160 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 },
-                display: { xs: 'none', md: 'table-cell' }
-              }}>
-                Envío / Ciudad
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 40, sm: 80 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 },
-                display: { xs: 'none', sm: 'table-cell' }
-              }}>
-                Items
-              </TableCell>
-              <TableCell sx={{ 
-                minWidth: { xs: 70, sm: 120 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 1, sm: 2 }
-              }}>
-                Estado
-              </TableCell>
-              <TableCell align="right" sx={{ 
-                minWidth: { xs: 60, sm: 120 }, 
-                fontWeight: 600,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 0.5, sm: 2 }
-              }}>
-                Acciones
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paged.map((sale) => (
-              <TableRow key={sale.id}>
-                <TableCell sx={{ 
+        <TableContainer component={Paper} sx={{
+          mb: { xs: 2, sm: 3 },
+          overflowX: 'auto',
+          borderRadius: { xs: 2, sm: 3 },
+          boxShadow: { xs: 1, sm: 3 }
+        }}>
+          <Table size="small" sx={{ minWidth: { xs: 600, sm: 700, md: 800 } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{
+                  minWidth: { xs: 40, sm: 60 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 }
                 }}>
-                  {sale.id}
+                  ID
                 </TableCell>
-                <TableCell sx={{ 
+                <TableCell sx={{
+                  minWidth: { xs: 80, sm: 120 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 },
                   display: { xs: 'none', sm: 'table-cell' }
                 }}>
-                  {sale.date}
+                  Fecha
                 </TableCell>
-                <TableCell sx={{ 
+                <TableCell sx={{
+                  minWidth: { xs: 100, sm: 160 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 }
                 }}>
-                  {sale.customer}
+                  Cliente
                 </TableCell>
-                <TableCell sx={{ 
+                <TableCell sx={{
+                  minWidth: { xs: 70, sm: 110 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 },
                   display: { xs: 'none', md: 'table-cell' }
                 }}>
-                  {sale.cedula || '—'}
+                  Cédula
                 </TableCell>
-                <TableCell align="right" sx={{ 
+                <TableCell align="right" sx={{
+                  minWidth: { xs: 60, sm: 90 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 }
                 }}>
-                  ${(Number(sale.subtotal || 0) + Number(sale.shippingCost || 0) + (Number(sale.taxPercent || 0) > 0 ? Number(sale.subtotal || 0) * Number(sale.taxPercent || 0) / 100 : 0) - (Number(sale.discountPercent || 0) > 0 ? Number(sale.subtotal || 0) * Number(sale.discountPercent || 0) / 100 : 0)).toFixed(2)}
+                  Total
                 </TableCell>
-                <TableCell sx={{ 
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                <TableCell sx={{
+                  minWidth: { xs: 100, sm: 160 },
+                  fontWeight: 600,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 },
                   display: { xs: 'none', md: 'table-cell' }
                 }}>
-                  {sale.shippingMethodName && sale.shippingCost !== undefined && sale.shippingCost !== null
-                    ? (
-                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                        <span style={{ fontWeight: 500 }}>{sale.shippingMethodName}</span>
-                        {Number(sale.subtotal || 0) >= freeShippingMin || Number(sale.shippingCost) === 0 ? (
-                          <>
-                            <span style={{ color: '#888', marginLeft: 4 }}>$0.00</span>
-                            <Chip size="small" label="Envío gratis" color="success" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
-                          </>
-                        ) : (
-                          <span style={{ color: '#888', marginLeft: 4 }}>${Number(sale.shippingCost).toFixed(2)}</span>
-                        )}
-                        {sale.shippingRegion && (
-                          <span style={{ color: '#888', marginLeft: 8 }}>{sale.shippingRegion}</span>
-                        )}
-                      </Stack>
-                    )
-                    : '—'}
+                  Envío / Ciudad
                 </TableCell>
-                <TableCell align="center" sx={{ 
+                <TableCell sx={{
+                  minWidth: { xs: 40, sm: 80 },
+                  fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  py: { xs: 0.75, sm: 1.5 },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 },
                   display: { xs: 'none', sm: 'table-cell' }
                 }}>
-                  {Array.isArray(sale.items) ? sale.items.length : 0}
+                  Items
                 </TableCell>
-                <TableCell sx={{ 
-                  py: { xs: 0.75, sm: 1.5 },
+                <TableCell sx={{
+                  minWidth: { xs: 70, sm: 120 },
+                  fontWeight: 600,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  py: { xs: 1, sm: 1.5 },
                   px: { xs: 1, sm: 2 }
                 }}>
-                  <Chip label={getStatusLabel(sale.status)} color={getStatusColor(sale.status)} />
+                  Estado
                 </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Tooltip title="Ver Detalle">
-                      <IconButton size="small" onClick={() => openDetails(sale)}>
-                        <Visibility fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar pedido">
-                      <IconButton size="small" color="error" onClick={() => deleteOrder(sale)}>
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
+                <TableCell align="right" sx={{
+                  minWidth: { xs: 60, sm: 120 },
+                  fontWeight: 600,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  py: { xs: 1, sm: 1.5 },
+                  px: { xs: 0.5, sm: 2 }
+                }}>
+                  Acciones
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paged.map((sale) => (
+                <TableRow key={sale.id}>
+                  <TableCell sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 }
+                  }}>
+                    {sale.id}
+                  </TableCell>
+                  <TableCell sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 },
+                    display: { xs: 'none', sm: 'table-cell' }
+                  }}>
+                    {sale.date}
+                  </TableCell>
+                  <TableCell sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 }
+                  }}>
+                    {sale.customer}
+                  </TableCell>
+                  <TableCell sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 },
+                    display: { xs: 'none', md: 'table-cell' }
+                  }}>
+                    {sale.cedula || '—'}
+                  </TableCell>
+                  <TableCell align="right" sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 }
+                  }}>
+                    ${(Number(sale.subtotal || 0) + Number(sale.shippingCost || 0) + (Number(sale.taxPercent || 0) > 0 ? Number(sale.subtotal || 0) * Number(sale.taxPercent || 0) / 100 : 0) - (Number(sale.discountPercent || 0) > 0 ? Number(sale.subtotal || 0) * Number(sale.discountPercent || 0) / 100 : 0)).toFixed(2)}
+                  </TableCell>
+                  <TableCell sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 },
+                    display: { xs: 'none', md: 'table-cell' }
+                  }}>
+                    {sale.shippingMethodName && sale.shippingCost !== undefined && sale.shippingCost !== null
+                      ? (
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                          <span style={{ fontWeight: 500 }}>{sale.shippingMethodName}</span>
+                          {Number(sale.subtotal || 0) >= freeShippingMin || Number(sale.shippingCost) === 0 ? (
+                            <>
+                              <span style={{ color: '#888', marginLeft: 4 }}>$0.00</span>
+                              <Chip size="small" label="Envío gratis" color="success" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                            </>
+                          ) : (
+                            <span style={{ color: '#888', marginLeft: 4 }}>${Number(sale.shippingCost).toFixed(2)}</span>
+                          )}
+                          {sale.shippingRegion && (
+                            <span style={{ color: '#888', marginLeft: 8 }}>{sale.shippingRegion}</span>
+                          )}
+                        </Stack>
+                      )
+                      : '—'}
+                  </TableCell>
+                  <TableCell align="center" sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 },
+                    display: { xs: 'none', sm: 'table-cell' }
+                  }}>
+                    {Array.isArray(sale.items) ? sale.items.length : 0}
+                  </TableCell>
+                  <TableCell sx={{
+                    py: { xs: 0.75, sm: 1.5 },
+                    px: { xs: 1, sm: 2 }
+                  }}>
+                    <Chip label={getStatusLabel(sale.status)} color={getStatusColor(sale.status)} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Tooltip title="Ver Detalle">
+                        <IconButton size="small" onClick={() => openDetails(sale)}>
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar pedido">
+                        <IconButton size="small" color="error" onClick={() => deleteOrder(sale)}>
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
@@ -942,19 +961,14 @@ const Sales = () => {
                 </Button>
               )}
               {(selected?.status === 'completed' || selected?.status === 'enviado' || selected?.status === 'entregado') && (
-                <Tooltip title="Conecta la pasarela de pago para habilitar reembolsos">
-                  <span>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      disabled
-                      onClick={() => {}}
-                    >
-                      ⟲ Reembolsar
-                    </Button>
-                  </span>
-                </Tooltip>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={handleRefund}
+                >
+                  ⟲ Reembolsar
+                </Button>
               )}
             </Stack>
           </Box>
@@ -973,7 +987,7 @@ const Sales = () => {
               {!!shippingMethodName && (
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main' }} />
-                  <Typography variant="body2">Envío: {shippingMethodName} {Number(shippingCost||0) ? `($${Number(shippingCost).toFixed(2)})` : ''}</Typography>
+                  <Typography variant="body2">Envío: {shippingMethodName} {Number(shippingCost || 0) ? `($${Number(shippingCost).toFixed(2)})` : ''}</Typography>
                 </Stack>
               )}
               {!!shippingEta && (
@@ -1003,8 +1017,8 @@ const Sales = () => {
               const lines = [
                 ...header,
                 ...fields
-                .filter(([, v]) => v && v.length > 0)
-                .map(([k, v]) => `${k}: ${v}`),
+                  .filter(([, v]) => v && v.length > 0)
+                  .map(([k, v]) => `${k}: ${v}`),
               ];
               const textToCopy = lines.join('\n');
               if (!textToCopy) {
@@ -1021,7 +1035,7 @@ const Sales = () => {
           >
             Copiar datos de envío
           </Button>
-          
+
           <Typography variant="body2" sx={{ mb: 1, fontSize: { xs: '0.95rem', sm: '1rem' } }}>Fecha: {selected?.date}</Typography>
           <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 1 }}>
@@ -1188,8 +1202,8 @@ const Sales = () => {
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2">Subtotal: ${subtotal.toFixed(2)}</Typography>
-                <Typography variant="body2">IVA: ${(subtotal * (Number(taxPercent)/100)).toFixed(2)}</Typography>
-                <Typography variant="body2">Descuento: -${(subtotal * (Number(discountPercent)/100)).toFixed(2)}</Typography>
+                <Typography variant="body2">IVA: ${(subtotal * (Number(taxPercent) / 100)).toFixed(2)}</Typography>
+                <Typography variant="body2">Descuento: -${(subtotal * (Number(discountPercent) / 100)).toFixed(2)}</Typography>
                 {subtotal >= freeShippingMin ? (
                   <Typography variant="body2" color="success.main">Envío: $0.00 (Envío gratis)</Typography>
                 ) : (
@@ -1202,7 +1216,7 @@ const Sales = () => {
                 <Typography variant="h5" sx={{ m: 0 }}>
                   ${
                     subtotal >= freeShippingMin
-                      ? Math.max(0, Number((subtotal + (subtotal * (Number(taxPercent)/100)) - (subtotal * (Number(discountPercent)/100))).toFixed(2)))
+                      ? Math.max(0, Number((subtotal + (subtotal * (Number(taxPercent) / 100)) - (subtotal * (Number(discountPercent) / 100))).toFixed(2)))
                       : Number(computedTotal).toFixed(2)
                   }
                 </Typography>
@@ -1239,7 +1253,7 @@ const Sales = () => {
                         <TableCell>
                           {String(att.type || '').startsWith('image/') ? (
                             <Box component="img" src={typeof att.data === 'string' ? att.data : ''} alt={att.name} sx={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 1, cursor: 'pointer' }} onClick={() => {
-                              try { window.open(att.data, '_blank'); } catch {}
+                              try { window.open(att.data, '_blank'); } catch { }
                             }} />
                           ) : (
                             <Box sx={{ width: 40, height: 40, bgcolor: '#f0f0f0', borderRadius: 1 }} />
@@ -1247,7 +1261,7 @@ const Sales = () => {
                         </TableCell>
                         <TableCell>{att.name}</TableCell>
                         <TableCell>{att.type}</TableCell>
-                        <TableCell>{Math.round((att.size || 0)/1024)} KB</TableCell>
+                        <TableCell>{Math.round((att.size || 0) / 1024)} KB</TableCell>
                         <TableCell align="right">
                           <Stack direction="row" spacing={1} justifyContent="flex-end">
                             <Button size="small" onClick={() => downloadAttachment(att)}>Descargar</Button>
@@ -1275,14 +1289,15 @@ const Sales = () => {
                   const { key, ...rest } = props as any;
                   const img = option.image || (Array.isArray(option.images) ? option.images[0] : undefined);
                   return (
-                  <li key={key} {...rest} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Avatar src={getImageUrl(img)} alt={option.name} variant="rounded" sx={{ width: 32, height: 32, mr: 1 }}>
-                      <ImageIcon fontSize="small" />
-                    </Avatar>
-                    <span>{option.name}</span>
-                    <Box sx={{ ml: 1, color: 'text.secondary', fontSize: 13 }}>${option.price}</Box>
-                  </li>
-                )}}
+                    <li key={key} {...rest} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Avatar src={getImageUrl(img)} alt={option.name} variant="rounded" sx={{ width: 32, height: 32, mr: 1 }}>
+                        <ImageIcon fontSize="small" />
+                      </Avatar>
+                      <span>{option.name}</span>
+                      <Box sx={{ ml: 1, color: 'text.secondary', fontSize: 13 }}>${option.price}</Box>
+                    </li>
+                  )
+                }}
                 renderInput={(params) => (
                   <TextField {...params} label="Buscar producto" size="small" sx={{ minWidth: 180 }} />
                 )}
@@ -1436,7 +1451,7 @@ const Sales = () => {
                   try {
                     const res = await productsApi.getById(String(it.productId));
                     if (res?.data?.id) refreshed.push(res.data);
-                  } catch {}
+                  } catch { }
                 }
                 if (refreshed.length) {
                   setProducts(prev => {
@@ -1449,7 +1464,7 @@ const Sales = () => {
                     return Array.from(map.values());
                   });
                 }
-              } catch {}
+              } catch { }
               setCancelOpen(false);
               setCopySnack({ open: true, message: 'Pedido cancelado y stock restaurado', severity: 'success' });
             } catch (e) {

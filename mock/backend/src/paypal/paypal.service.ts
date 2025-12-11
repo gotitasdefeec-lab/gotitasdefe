@@ -122,4 +122,35 @@ export class PaypalService {
             throw new Error('Failed to get PayPal order details');
         }
     }
+
+    /**
+     * Refunds a captured payment
+     */
+    async refundOrder(captureId: string, amount?: string, currency: string = 'USD') {
+        if (!this.client) {
+            throw new Error('PayPal client not initialized. Please configure PayPal credentials.');
+        }
+
+        const request = new paypal.payments.CapturesRefundRequest(captureId);
+
+        if (amount) {
+            request.requestBody({
+                amount: {
+                    value: amount,
+                    currency_code: currency
+                }
+            });
+        } else {
+            request.requestBody({});
+        }
+
+        try {
+            const response = await this.client.execute(request);
+            this.logger.log(`PayPal refund processed for capture ${captureId}: ${response.result.id}`);
+            return response.result;
+        } catch (error) {
+            this.logger.error('Error processing PayPal refund:', error);
+            throw new Error('Failed to process PayPal refund');
+        }
+    }
 }

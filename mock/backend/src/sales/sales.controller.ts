@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class SalesController {
-  constructor(private salesService: SalesService) {}
+  constructor(private salesService: SalesService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all sales' })
@@ -47,5 +47,10 @@ export class SalesController {
   @ApiOperation({ summary: 'Delete sale' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.salesService.delete(id);
+  }
+  @Post(':id/refund')
+  @ApiOperation({ summary: 'Refund sale via PayPal' })
+  refund(@Param('id', ParseIntPipe) id: number) {
+    return this.salesService.refund(id);
   }
 }

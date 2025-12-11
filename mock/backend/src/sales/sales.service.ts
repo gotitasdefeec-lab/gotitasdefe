@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PaypalService } from '../paypal/paypal.service';
 
 interface OrderItemPayload {
   productId: number;
@@ -13,7 +14,8 @@ export class SalesService {
   constructor(
     private prisma: PrismaService,
     private notifications: NotificationsService,
-  ) {}
+    private paypalService: PaypalService,
+  ) { }
 
   private async createSaleTransaction(
     tx: Prisma.TransactionClient,
@@ -133,7 +135,7 @@ export class SalesService {
         badge: '/favicon.png',
         data: { url: '/sales' },
       })
-      .catch(() => {});
+      .catch(() => { });
 
     // Optional: low stock alerts for any affected products
     try {
@@ -159,10 +161,10 @@ export class SalesService {
               badge: '/favicon.png',
               data: { url: '/inventory' },
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       }
-    } catch {}
+    } catch { }
 
     return sale;
   }
@@ -188,7 +190,7 @@ export class SalesService {
         badge: '/favicon.png',
         data: { url: '/sales' },
       })
-      .catch(() => {});
+      .catch(() => { });
 
     // Optional low-stock check similar to create()
     try {
@@ -214,10 +216,10 @@ export class SalesService {
               badge: '/favicon.png',
               data: { url: '/inventory' },
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       }
-    } catch {}
+    } catch { }
 
     return sale;
   }
@@ -262,7 +264,7 @@ export class SalesService {
 
       if (isCompletingOrder) {
         const saleDetails = await tx.sale.findUnique({ where: { id } });
-        
+
         if (!saleDetails.customerId && saleDetails.customerEmail) {
           let customer = await tx.customer.findUnique({
             where: { email: saleDetails.customerEmail },
@@ -338,5 +340,52 @@ export class SalesService {
         data: { status: 'cancelled', cancellationReason: reason || 'Cancelado por el sistema' },
       });
     });
+  }
+
+  async refund(id: number) {
+    const sale = await this.prisma.sale.findUnique({
+      where: { id },
+    });
+
+    if (!sale) {
+      throw new NotFoundException(`Venta con id ${id} no encontrada`);
+    }
+
+    // Extract PayPal Order ID from notes
+    // Expected format: "Orden pagada con PayPal (ID: XXXXXXXXX)" or similar
+    const noteMatch = sale.notes?.match(/PayPal.*ID:?\s*(\w+)/i);
+    const paypalOrderId = noteMatch ? noteMatch[1] : null;
+
+    if (!paypalOrderId) {
+      throw new BadRequestException('No se encontró el ID de orden de PayPal en las notas de la venta.');
+    }
+
+    try {
+      // 1. Get detailed order info from PayPal to find capture ID
+      const orderDetails = await this.paypalService.getOrderDetails(paypalOrderId);
+
+      const purchaseUnit = orderDetails.purchase_units?.[0];
+      const captureId = purchaseUnit?.payments?.captures?.[0]?.id;
+
+      if (!captureId) {
+        throw new BadRequestException('No se encontró un pago capturado (Capture ID) para esta orden de PayPal.');
+      }
+
+      // 2. Process refund
+      await this.paypalService.refundOrder(captureId);
+
+      // 3. Update sale status
+      return this.prisma.sale.update({
+        where: { id },
+        data: {
+          status: 'refunded', // Using 'refunded' status string
+          notes: `${sale.notes || ''}\nReembolsado exitosamente el ${new Date().toLocaleString()}`
+        },
+      });
+
+    } catch (error) {
+      console.error('Refund error:', error);
+      throw new BadRequestException(error.message || 'Error al procesar el reembolso con PayPal');
+    }
   }
 }
