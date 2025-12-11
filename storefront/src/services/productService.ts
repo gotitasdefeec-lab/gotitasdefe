@@ -35,10 +35,7 @@ export const productService = {
 
       return processedProducts;
     } catch (error: any) {
-      console.error('Error fetching products:', error);
-      if (error?.response) {
-        console.error('Error response:', error.response.status, error.response.statusText);
-      }
+      // console.error('Error fetching products:', error);
       return [];
     }
   },
@@ -51,7 +48,7 @@ export const productService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching product:', error);
+      // console.error('Error fetching product:', error);
       return null;
     }
   },
@@ -62,7 +59,7 @@ export const productService = {
       const response = await publicApi.get('/public/products/featured');
       return Array.isArray(response.data) ? response.data : response.data?.data || [];
     } catch (error) {
-      console.error('Error fetching featured products:', error);
+      // console.error('Error fetching featured products:', error);
       return [];
     }
   },
@@ -73,7 +70,7 @@ export const productService = {
       const response = await publicApi.get(`/public/categories/${categoryName}/products`);
       return Array.isArray(response.data) ? response.data : response.data?.data || [];
     } catch (error) {
-      console.error('Error fetching products by category:', error);
+      // console.error('Error fetching products by category:', error);
       return [];
     }
   },
@@ -95,7 +92,7 @@ export const productService = {
       // Return only the first 'limit' products for autocomplete
       return filteredProducts.slice(0, limit);
     } catch (error) {
-      console.error('Error searching products for autocomplete:', error);
+      // console.error('Error searching products for autocomplete:', error);
       return [];
     }
   },
@@ -111,37 +108,7 @@ export const productService = {
         product.sku.toLowerCase().includes(lowerQuery)
       );
     } catch (error) {
-      console.error('Error searching products:', error);
-      return [];
-    }
-  }
-};
-
-export const categoryService = {
-  // Get all categories
-  async getCategories(): Promise<Category[]> {
-    try {
-      console.log('Fetching categories from API...');
-      const response = await publicApi.get('/public/categories');
-      console.log('Categories API response:', response);
-
-      let categories = [];
-      if (Array.isArray(response.data)) {
-        categories = response.data;
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
-        categories = response.data.data;
-      } else {
-        console.warn('Unexpected categories API response format:', response.data);
-        return [];
-      }
-
-      console.log(`Successfully fetched ${categories.length} categories`);
-      return categories;
-    } catch (error: any) {
-      console.error('Error fetching categories:', error);
-      if (error?.response) {
-        console.error('Categories error response:', error.response.status, error.response.statusText);
-      }
+      // console.error('Error searching products:', error);
       return [];
     }
   }
