@@ -12,10 +12,7 @@ const nextConfig = {
   // Evita advertencia de raíz inferida en monorepo
   outputFileTracingRoot: path.join(__dirname, '..'),
 
-  eslint: {
-    // Allow production builds to complete even if there are ESLint errors
-    ignoreDuringBuilds: true,
-  },
+
   async rewrites() {
     return [
       {
