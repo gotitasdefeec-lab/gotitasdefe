@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
-import { productService, categoryService } from '@/services/productService';
+import { productService } from '@/services/productService';
+import { categoryService } from '@/services/categoryService';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://gotasdefe.com';

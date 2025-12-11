@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product, Category } from '@/types';
-import { productService, categoryService } from '@/services/productService';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon, 
+import { productService } from '@/services/productService';
+import { categoryService } from '@/services/categoryService';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
   XMarkIcon,
   AdjustmentsHorizontalIcon,
-  ClockIcon 
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 export interface AdvancedFilters {
@@ -25,12 +26,12 @@ interface AdvancedSearchProps {
   initialFilters?: Partial<AdvancedFilters>;
 }
 
-const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ 
-  onFiltersChange, 
-  initialFilters = {} 
+const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
+  onFiltersChange,
+  initialFilters = {}
 }) => {
   console.log('AdvancedSearch: Componente inicializado', { initialFilters });
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
       setLoading(true);
       try {
         console.log('AdvancedSearch: Iniciando carga de datos...');
-        
+
         const [productsData, categoriesData] = await Promise.all([
           productService.getProducts(),
           categoryService.getCategories()
@@ -74,17 +75,17 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
         // Calcular estadísticas de precios
         let minPrice = 0;
         let maxPrice = 1000;
-        
+
         if (productsData.length > 0) {
           const validPrices = productsData
             .map(p => parseFloat(p.price.toString()) || 0)
             .filter(price => price > 0);
-          
+
           if (validPrices.length > 0) {
             minPrice = Math.min(...validPrices);
             maxPrice = Math.max(...validPrices);
             setPriceStats({ min: minPrice, max: maxPrice });
-            
+
             // Actualizar filtros si es la primera carga
             if (filters.priceRange[1] === 1000) {
               setFilters(prev => ({
@@ -113,7 +114,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           products: productsData.length,
           initialFilters
         });
-        
+
         const initialFiltersWithDefaults = {
           searchTerm: '',
           categoryId: null,
@@ -123,7 +124,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           sortBy: 'name' as const,
           ...initialFilters
         };
-        
+
         onFiltersChange(initialFiltersWithDefaults, productsData);
       } catch (error) {
         console.error('AdvancedSearch: Error loading data:', error);
@@ -154,7 +155,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
     // Búsqueda por texto (mejorada)
     if (hasSearchTerm) {
       const searchTerms = filters.searchTerm.toLowerCase().split(' ').filter(Boolean);
-      
+
       filtered = filtered.filter(product => {
         const searchableText = [
           product.name || '',
@@ -258,12 +259,12 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   };
 
   const hasActiveFilters = () => {
-    return filters.searchTerm || 
-           filters.categoryId || 
-           filters.priceRange[0] !== priceStats.min || 
-           filters.priceRange[1] !== priceStats.max ||
-           filters.inStock !== null ||
-           filters.featured !== null;
+    return filters.searchTerm ||
+      filters.categoryId ||
+      filters.priceRange[0] !== priceStats.min ||
+      filters.priceRange[1] !== priceStats.max ||
+      filters.inStock !== null ||
+      filters.featured !== null;
   };
 
   if (loading) {
@@ -295,7 +296,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
               <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
-              
+
               {/* Historial de búsqueda */}
               {showHistory && searchHistory.length > 0 && (
                 <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -339,11 +340,10 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`flex items-center space-x-2 px-4 py-3 border rounded-lg transition-colors text-sm ${
-                showAdvanced || hasActiveFilters() 
-                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
+              className={`flex items-center space-x-2 px-4 py-3 border rounded-lg transition-colors text-sm ${showAdvanced || hasActiveFilters()
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-300 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5" />
               <span>Filtros Avanzados</span>
@@ -368,9 +368,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
               </label>
               <select
                 value={filters.categoryId || ''}
-                onChange={(e) => setFilters(prev => ({ 
-                  ...prev, 
-                  categoryId: e.target.value ? Number(e.target.value) : null 
+                onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  categoryId: e.target.value ? Number(e.target.value) : null
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
@@ -393,9 +393,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                   <input
                     type="number"
                     value={filters.priceRange[0]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [Number(e.target.value), prev.priceRange[1]] 
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      priceRange: [Number(e.target.value), prev.priceRange[1]]
                     }))}
                     placeholder="Mín"
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
@@ -405,9 +405,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                   <input
                     type="number"
                     value={filters.priceRange[1]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [prev.priceRange[0], Number(e.target.value)] 
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      priceRange: [prev.priceRange[0], Number(e.target.value)]
                     }))}
                     placeholder="Máx"
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
@@ -428,9 +428,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
               </label>
               <select
                 value={filters.inStock === null ? '' : filters.inStock.toString()}
-                onChange={(e) => setFilters(prev => ({ 
-                  ...prev, 
-                  inStock: e.target.value === '' ? null : e.target.value === 'true' 
+                onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  inStock: e.target.value === '' ? null : e.target.value === 'true'
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
@@ -447,9 +447,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
               </label>
               <select
                 value={filters.featured === null ? '' : filters.featured.toString()}
-                onChange={(e) => setFilters(prev => ({ 
-                  ...prev, 
-                  featured: e.target.value === '' ? null : e.target.value === 'true' 
+                onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  featured: e.target.value === '' ? null : e.target.value === 'true'
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
@@ -477,8 +477,8 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
       {/* Click away para cerrar historial */}
       {showHistory && (
-        <div 
-          className="fixed inset-0 z-0" 
+        <div
+          className="fixed inset-0 z-0"
           onClick={() => setShowHistory(false)}
         />
       )}

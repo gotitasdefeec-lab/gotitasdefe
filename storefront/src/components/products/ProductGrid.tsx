@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product, Category } from '@/types';
-import { productService, categoryService } from '@/services/productService';
+import { productService } from '@/services/productService';
+import { categoryService } from '@/services/categoryService';
 import ProductCard from './ProductCard';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
@@ -38,7 +39,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           featuredOnly ? productService.getFeaturedProducts() : productService.getProducts(),
           categoryService.getCategories()
         ]);
-        
+
         setProducts(productsData);
         setCategories(categoriesData);
       } catch (error) {
