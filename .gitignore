@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Cloudflare Tunnel
+cloudflare-tunnel-token.txt
+tunnel-info.json
+start_services_cloudflare.bat
