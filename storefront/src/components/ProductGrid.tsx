@@ -8,6 +8,25 @@ import { useCartDrawer } from '@/components/layout/Layout';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+
+// Helper para construir una URL de imagen válida (base64, absoluta o ruta relativa del backend)
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath) return '/placeholder-product.svg';
+  if (typeof imagePath !== 'string') return '/placeholder-product.svg';
+  const path = imagePath.trim();
+  if (path.startsWith('data:image') || path.startsWith('http')) {
+    // Reescribe via.placeholder.com si aparece, para evitar DNS issues
+    if (path.includes('via.placeholder.com')) {
+      const m = path.match(/via\.placeholder\.com\/([0-9]+(?:x[0-9]+)?)/);
+      const size = m && m[1] ? m[1] : '400x400';
+      return `https://placehold.co/${size}`;
+    }
+    return path;
+  }
+  return `${API_URL}${path}`;
+};
+
 export default function ProductGrid({ products }: { products: Product[] }) {
   const { addItem } = useCart();
   const { openCart } = useCartDrawer();
@@ -46,7 +65,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
               <Link href={`/products/${product.id}`} className="block" prefetch={true}>
                 <div className="relative overflow-hidden bg-gray-50 mb-4 aspect-square rounded-lg">
                   <Image
-                    src={(product.image || (product.images && product.images[0])) || '/placeholder-product.svg'}
+                    src={getImageUrl((product.image || (product.images && product.images[0])) || null)}
                     alt={product.name}
                     fill
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
