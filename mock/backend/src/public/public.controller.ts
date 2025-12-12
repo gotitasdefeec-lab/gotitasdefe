@@ -35,13 +35,37 @@ export class PublicController {
   }
 
 
+  // Helper to map product to storefront format
+  private mapProductForStorefront(product: any) {
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image: product.image,
+      images: Array.isArray(product.images) ? product.images : [],
+      categoryId: 1, // Default category ID
+      category: product.category,
+      stock: product.stock,
+      sku: product.sku,
+      active: product.status === 'active',
+      featured: true, // All products in featured endpoint are featured
+      tags: [],
+      specifications: {},
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+    };
+  }
+
   // Public Product Endpoints
   @Get('products')
   @ApiOperation({ summary: 'Get all products (public)' })
   async getProducts() {
     const products = await this.productsService.findAll();
     // Only return active products for the storefront
-    return products.filter(product => product.status === 'active');
+    return products
+      .filter(product => product.status === 'active')
+      .map(product => this.mapProductForStorefront(product));
   }
 
   @Get('products/featured')
@@ -49,7 +73,10 @@ export class PublicController {
   async getFeaturedProducts() {
     const products = await this.productsService.findAll();
     // For now, just return active products. You can add a 'featured' field to the schema later
-    return products.filter(product => product.status === 'active').slice(0, 8);
+    return products
+      .filter(product => product.status === 'active')
+      .slice(0, 8)
+      .map(product => this.mapProductForStorefront(product));
   }
 
   @Get('products/:id')
@@ -60,7 +87,7 @@ export class PublicController {
     if (product.status !== 'active') {
       throw new Error('Product not found');
     }
-    return product;
+    return this.mapProductForStorefront(product);
   }
 
   // Public Category Endpoints

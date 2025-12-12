@@ -3,11 +3,17 @@ import HeroCarousel from '@/components/HeroCarousel';
 import ProductGrid from '@/components/ProductGrid';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
 
 async function getFeaturedProducts() {
   try {
-    const res = await fetch(`${BASE}/public/products/featured`, { 
+    const url = `${BASE}/public/products/featured`;
+    console.log('Fetching from:', url);
+    const res = await fetch(url, { 
       cache: 'no-store' // Disable cache to always get fresh data
     });
     if (!res.ok) {
