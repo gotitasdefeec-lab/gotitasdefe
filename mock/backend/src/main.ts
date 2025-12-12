@@ -30,6 +30,8 @@ async function bootstrap() {
     'https://ejemplo-tienda.ngrok.dev', // Storefront ngrok
     'https://administrador-clementine.ngrok.app', // Admin ngrok
     'https://gotitasdefe-tienda.vercel.app', // Storefront Vercel
+    'https://gotasdefe.com', // Dominio principal
+    'https://www.gotasdefe.com', // Dominio principal www
     /^https:\/\/[a-z0-9-]+\.ngrok\.app$/, // any ngrok.app subdomain
     /^https:\/\/[a-z0-9-]+\.ngrok-free\.dev$/, // any ngrok-free.dev subdomain
     /^https:\/\/[a-z0-9.-]+\.ngrok\.dev$/, // any ngrok.dev subdomain (con puntos)
