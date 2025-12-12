@@ -3,7 +3,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import ProductGrid from '@/components/ProductGrid';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
+const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
 
 async function getFeaturedProducts() {
   try {
