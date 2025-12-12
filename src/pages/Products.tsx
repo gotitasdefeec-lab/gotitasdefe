@@ -40,8 +40,7 @@ import {
   DialogContentText,
 } from '@mui/material';
 
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
 
 import {
   Add as AddIcon,
@@ -83,10 +82,10 @@ const Products = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [manageCategoriesOpen, setManageCategoriesOpen] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<{open: boolean, id?: number, name?: string}>({ open: false });
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean, id?: number, name?: string }>({ open: false });
   const [editingCatId, setEditingCatId] = useState<number | null>(null);
   const [editingCatName, setEditingCatName] = useState('');
 
@@ -146,8 +145,8 @@ const Products = () => {
         const res = await categoriesApi.getAll();
         // El backend NestJS devuelve directamente el array, no encapsulado en data
         const categoriesData = Array.isArray(res) ? res : (res.data || []);
-        setCategories(categoriesData as {id: number, name: string}[]);
-      } catch {}
+        setCategories(categoriesData as { id: number, name: string }[]);
+      } catch { }
     };
     fetchProducts();
     fetchCategories();
@@ -272,9 +271,9 @@ const Products = () => {
   };
 
   const filteredProducts = products.filter((product) => {
-  const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             (product.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-             (product.sku || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.sku || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -400,8 +399,8 @@ const Products = () => {
                           return;
                         }
                         try {
-                            const res = await categoriesApi.create({ name });
-                            const cat = Array.isArray(res) ? res[0] : (res.data || res);
+                          const res = await categoriesApi.create({ name });
+                          const cat = Array.isArray(res) ? res[0] : (res.data || res);
                           setCategories(prev => [...prev, cat]);
                           setFieldValue('category', cat.name);
                           setNewCategory('');
@@ -434,21 +433,15 @@ const Products = () => {
                     Descripción del producto
                   </Typography>
                   <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
-                    <ReactQuill
+                    <TextField
                       value={values.description}
-                      onChange={value => setFieldValue('description', value)}
-                      theme="snow"
-                      style={{ height: '250px', background: '#fff' }}
+                      onChange={handleChange}
+                      name="description"
+                      multiline
+                      minRows={6}
+                      fullWidth
                       placeholder="Detalles, materiales, cuidados, etc."
-                      modules={{
-                        toolbar: [
-                          [{ 'header': [1, 2, false] }],
-                          ['bold', 'italic', 'underline', 'strike'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['link', 'image'],
-                          ['clean']
-                        ]
-                      }}
+                      sx={{ bgcolor: '#fff' }}
                     />
                   </Box>
                 </Grid>

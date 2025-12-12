@@ -1,5 +1,4 @@
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box, Button, Card, CardContent, Grid, Tab, Tabs, TextField, Typography, IconButton, List, ListItem, ListItemText, ListItemSecondaryAction,
@@ -465,21 +464,14 @@ const StoreSettings: React.FC = () => {
                           Contenido página Nosotros
                         </Typography>
                         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                          <ReactQuill
+                          <TextField
                             value={generalForm.about ?? ''}
-                            onChange={value => setGeneralForm(f => ({ ...f, about: value }))}
-                            theme="snow"
-                            style={{ height: '200px', background: '#fff' }}
+                            onChange={(e) => setGeneralForm(f => ({ ...f, about: e.target.value }))}
+                            multiline
+                            minRows={6}
+                            fullWidth
                             placeholder="Escribe la historia, misión, visión o valores de tu tienda."
-                            modules={{
-                              toolbar: [
-                                [{ 'header': [1, 2, false] }],
-                                ['bold', 'italic', 'underline', 'strike'],
-                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                ['link', 'image'],
-                                ['clean']
-                              ]
-                            }}
+                            sx={{ bgcolor: '#fff' }}
                           />
                         </Box>
                       </Grid>
@@ -488,21 +480,14 @@ const StoreSettings: React.FC = () => {
                           Contenido página Contacto
                         </Typography>
                         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                          <ReactQuill
+                          <TextField
                             value={generalForm.contact ?? ''}
-                            onChange={value => setGeneralForm(f => ({ ...f, contact: value }))}
-                            theme="snow"
-                            style={{ height: '200px', background: '#fff' }}
+                            onChange={(e) => setGeneralForm(f => ({ ...f, contact: e.target.value }))}
+                            multiline
+                            minRows={6}
+                            fullWidth
                             placeholder="Agrega información de contacto, horarios, ubicación, etc."
-                            modules={{
-                              toolbar: [
-                                [{ 'header': [1, 2, false] }],
-                                ['bold', 'italic', 'underline', 'strike'],
-                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                ['link', 'image'],
-                                ['clean']
-                              ]
-                            }}
+                            sx={{ bgcolor: '#fff' }}
                           />
                         </Box>
                       </Grid>
@@ -834,21 +819,14 @@ const StoreSettings: React.FC = () => {
                       sx={{ mb: 2 }}
                     />
                     <Box sx={{ mb: 2 }}>
-                      <ReactQuill
+                      <TextField
                         value={editingPolicy.content}
-                        onChange={value => setEditingPolicy({ ...editingPolicy, content: value })}
-                        theme="snow"
-                        style={{ height: '200px', background: '#fff' }}
+                        onChange={(e) => setEditingPolicy({ ...editingPolicy, content: e.target.value })}
+                        multiline
+                        minRows={10}
+                        fullWidth
                         placeholder="Escribe el contenido de la política."
-                        modules={{
-                          toolbar: [
-                            [{ 'header': [1, 2, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                            ['link', 'image'],
-                            ['clean']
-                          ]
-                        }}
+                        sx={{ bgcolor: '#fff' }}
                       />
                     </Box>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
