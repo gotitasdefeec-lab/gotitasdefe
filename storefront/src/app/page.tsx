@@ -7,12 +7,19 @@ const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.co
 
 async function getFeaturedProducts() {
   try {
-    const res = await fetch(`${BASE}/public/products/featured`, { next: { revalidate: 3600 } });
-    if (!res.ok) return [] as any[];
+    const res = await fetch(`${BASE}/public/products/featured`, { 
+      cache: 'no-store' // Disable cache to always get fresh data
+    });
+    if (!res.ok) {
+      console.error('Failed to fetch featured products:', res.status);
+      return [] as any[];
+    }
     const data = await res.json();
     const arr = Array.isArray(data) ? data : data?.data || [];
+    console.log('Featured products fetched:', arr.length);
     return arr.slice(0, 8);
-  } catch (_) {
+  } catch (err) {
+    console.error('Error fetching featured products:', err);
     return [] as any[];
   }
 }
