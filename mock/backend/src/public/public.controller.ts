@@ -108,7 +108,9 @@ export class PublicController {
   @ApiOperation({ summary: 'Get products by category name (public)' })
   async getProductsByCategory(@Param('name') categoryName: string) {
     const products = await this.productsService.findAll();
-    return products.filter(product => product.status === 'active' && product.category === categoryName);
+    return products
+      .filter(product => product.status === 'active' && product.category === categoryName)
+      .map(product => this.mapProductForStorefront(product));
   }
 
   // Public Store Configuration Endpoints

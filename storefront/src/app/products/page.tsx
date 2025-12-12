@@ -1,14 +1,18 @@
 import React from 'react';
 import SimpleProductGrid from '@/components/products/SimpleProductGrid';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
 
 async function getProducts(categoryName?: string | null) {
   try {
     const url = categoryName
       ? `${BASE}/public/categories/${encodeURIComponent(categoryName!)}/products`
       : `${BASE}/public/products`;
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return [] as any[];
     const data = await res.json();
     return Array.isArray(data) ? data : data?.data || [];
