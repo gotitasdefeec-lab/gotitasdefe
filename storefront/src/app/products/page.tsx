@@ -5,10 +5,10 @@ const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://vitaminic-yusuf-
 
 async function getProducts(categoryName?: string | null) {
   try {
-    const url = categoryName 
+    const url = categoryName
       ? `${BASE}/public/categories/${encodeURIComponent(categoryName!)}/products`
       : `${BASE}/public/products`;
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return [] as any[];
     const data = await res.json();
     return Array.isArray(data) ? data : data?.data || [];
@@ -27,7 +27,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="min-h-screen bg-white py-12 md:py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SimpleProductGrid 
+        <SimpleProductGrid
           title={title}
           subtitle={subtitle}
           categoryName={categoryName}

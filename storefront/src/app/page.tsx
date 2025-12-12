@@ -7,7 +7,7 @@ const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'http://localhost:4001';
 
 async function getFeaturedProducts() {
   try {
-    const res = await fetch(`${BASE}/public/products/featured`, { next: { revalidate: 1 } });
+    const res = await fetch(`${BASE}/public/products/featured`, { next: { revalidate: 3600 } });
     if (!res.ok) return [] as any[];
     const data = await res.json();
     const arr = Array.isArray(data) ? data : data?.data || [];
@@ -19,7 +19,7 @@ async function getFeaturedProducts() {
 
 async function getCarouselSlides() {
   try {
-    const res = await fetch(`${BASE}/public/carousel`, { next: { revalidate: 1 } });
+    const res = await fetch(`${BASE}/public/carousel`, { next: { revalidate: 3600 } });
     if (!res.ok) return [] as any[];
     return await res.json();
   } catch (_) {

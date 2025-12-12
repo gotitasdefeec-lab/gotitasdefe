@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', weight: ['300', '400'
 
 async function getStoreConfig() {
   try {
-    const res = await fetch(`${BASE}/public/store/config`, { next: { revalidate: 60 } });
+    const res = await fetch(`${BASE}/public/store/config`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to load store config: ${res.status}`);
     return await res.json();
   } catch (_) {
@@ -20,7 +20,7 @@ async function getStoreConfig() {
 
 async function getLogoUrl() {
   try {
-    const res = await fetch(`${BASE}/public/store/logo`, { next: { revalidate: 60 } });
+    const res = await fetch(`${BASE}/public/store/logo`, { next: { revalidate: 3600 } });
     if (!res.ok) return '';
     const data = await res.json();
     return data?.url || '';
@@ -31,7 +31,7 @@ async function getLogoUrl() {
 
 async function getPolicies() {
   try {
-    const res = await fetch(`${BASE}/public/policies`, { next: { revalidate: 300 } });
+    const res = await fetch(`${BASE}/public/policies`, { next: { revalidate: 86400 } });
     if (!res.ok) return [] as any[];
     return await res.json();
   } catch (_) {
