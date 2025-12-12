@@ -26,7 +26,7 @@ const nextConfig: any = {
   // Configuración de imágenes optimizada
   images: {
     formats: ['image/webp', 'image/avif'],
-    domains: ['images.unsplash.com', 'localhost'],
+    domains: ['images.unsplash.com', 'localhost', 'api.gotasdefe.com', 'gotasdefe.com', 'www.gotasdefe.com'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
@@ -34,6 +34,9 @@ const nextConfig: any = {
       { protocol: 'https', hostname: '**.ngrok-free.dev' },
       { protocol: 'http', hostname: '**.ngrok-free.app' },
       { protocol: 'http', hostname: '**.ngrok-free.dev' },
+      { protocol: 'https', hostname: 'api.gotasdefe.com' },
+      { protocol: 'https', hostname: 'gotasdefe.com' },
+      { protocol: 'https', hostname: 'www.gotasdefe.com' },
     ],
   },
 
