@@ -24,13 +24,13 @@ export const publicOrderService = {
       country: string;
     };
     paymentMethod: string;
-  shippingMethodId?: string;
-  shippingMethodName?: string;
-  shippingCost?: number;
-  shippingCarrier?: string;
-  shippingRegion?: string;
-  shippingScope?: string;
-  shippingEta?: string;
+    shippingMethodId?: string;
+    shippingMethodName?: string;
+    shippingCost?: number;
+    shippingCarrier?: string;
+    shippingRegion?: string;
+    shippingScope?: string;
+    shippingEta?: string;
     notes?: string;
     cedula?: string;
   }) {
@@ -38,9 +38,9 @@ export const publicOrderService = {
       // Calculate totals client-side
       const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       // Allow caller to pass a selected shipping cost via metadata in a future enhancement; for now keep logic consistent with checkout
-  const shipping = subtotal >= 50 ? 0 : 5.99;
-  // Do not apply taxes by default
-  const tax = 0;
+      const shipping = subtotal >= 50 ? 0 : 5.99;
+      // Do not apply taxes by default
+      const tax = 0;
       const total = subtotal + shipping + tax;
 
       // Format data for backend
@@ -51,8 +51,8 @@ export const publicOrderService = {
         status: 'pending',
         total: total,
         subtotal: subtotal,
-  // Keep IVA disabled by default (0%) unless enabled via store config
-  taxPercent: 0,
+        // Keep IVA disabled by default (0%) unless enabled via store config
+        taxPercent: 0,
         discountPercent: 0,
         items: orderData.items.map(item => ({
           productId: item.productId,
@@ -77,7 +77,7 @@ export const publicOrderService = {
 
       // Send to backend
       const response = await publicApi.post('/public/orders', saleData);
-      
+
       return {
         id: response.data.id || Date.now(), // Fallback ID
         ...saleData,
@@ -92,7 +92,7 @@ export const publicOrderService = {
         // 1) Decrease stock for each item in /products and /inventory
         // Cliente limpio para JSON Server (sin Authorization)
         const jsonApi = axios.create({
-          baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://seamus-shapeliest-overstiffly.ngrok-free.dev',
+          baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.gotasdefe.com',
           headers: { 'Content-Type': 'application/json' },
           timeout: 10000,
         });
@@ -166,7 +166,7 @@ export const publicOrderService = {
           date: new Date().toISOString(),
           attachments: [],
         };
-  const saleRes = await jsonApi.post('/sales', salePayload);
+        const saleRes = await jsonApi.post('/sales', salePayload);
         const created = saleRes?.data || { id: Date.now(), ...salePayload };
 
         return {
@@ -203,7 +203,7 @@ export const publicOrderService = {
 
     // Different rates by country/city
     let baseRate = 5.99;
-    
+
     if (address.country === 'Ecuador') {
       const majorCities = ['quito', 'guayaquil', 'cuenca', 'ambato'];
       if (majorCities.includes(address.city.toLowerCase())) {
@@ -214,7 +214,7 @@ export const publicOrderService = {
     } else {
       baseRate = 15.99; // International shipping
     }
-    
+
     return Math.round(baseRate * 100) / 100;
   },
 
