@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function Head() {
-  const apiBase = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+  const apiBase = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com/api';
   let apiOrigin = '';
   try {
     apiOrigin = new URL(apiBase).origin;

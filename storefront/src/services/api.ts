@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Bases configurables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.gotasdefe.com'; // Backend NestJS
-const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com'; // Backend NestJS
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.gotasdefe.com/api'; // Backend NestJS
+const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com/api'; // Backend NestJS
 // Named export for building absolute asset URLs in UI components
 export const API_URL = PUBLIC_API_BASE_URL;
 

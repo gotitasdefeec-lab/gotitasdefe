@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import ClientProviders from '@/components/layout/ClientProviders';
 import { Inter } from 'next/font/google';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com/api';
 const inter = Inter({ subsets: ['latin'], display: 'swap', weight: ['300', '400', '500', '600', '700'] });
 
 async function getStoreConfig() {

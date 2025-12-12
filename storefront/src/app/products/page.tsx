@@ -1,7 +1,7 @@
 import React from 'react';
 import SimpleProductGrid from '@/components/products/SimpleProductGrid';
 
-const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+const BASE = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com/api';
 
 async function getProducts(categoryName?: string | null) {
   try {
