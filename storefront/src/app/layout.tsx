@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: general.name || 'Gotitas de Fe',
     },
     verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+      google: 'zrFsydo1FWgVscWTNkKScyCSGoltsELP1zrdxS5wNBI',
     },
     robots: {
       index: true,
