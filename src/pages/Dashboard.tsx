@@ -125,6 +125,11 @@ const Dashboard = () => {
     const now = new Date();
     const buckets = new Array(7).fill(0);
     for (const o of orders) {
+      // Excluir pedidos cancelados y reembolsados
+      const status = String(o.status || '').toLowerCase();
+      const isCancelledOrRefunded = status === 'cancelled' || status === 'canceled' || status === 'refunded';
+      if (isCancelledOrRefunded) continue;
+      
       if (!o.date) continue;
       const d = new Date(o.date);
       const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
@@ -200,12 +205,19 @@ const Dashboard = () => {
     let orders7 = 0;
     const customers = new Set<string>();
     for (const o of orders) {
+      // Excluir pedidos cancelados y reembolsados del cálculo de ventas
+      const status = String(o.status || '').toLowerCase();
+      const isCancelledOrRefunded = status === 'cancelled' || status === 'canceled' || status === 'refunded';
+      
       const total = Number(o.total) || 0;
       const d = o.date ? new Date(o.date) : null;
       if (d) {
         const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays >= 0 && diffDays < 7) {
-          totalSales7 += total;
+          // Solo sumar ventas si NO está cancelado o reembolsado
+          if (!isCancelledOrRefunded) {
+            totalSales7 += total;
+          }
           orders7 += 1;
         }
       }
