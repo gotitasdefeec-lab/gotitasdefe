@@ -79,8 +79,15 @@ const Profile = () => {
       try {
         const response = await salesApi.getAll();
         const salesData = response.data || [];
-        const totalSales = salesData.length;
-        const totalRevenue = salesData.reduce((sum: number, sale: any) => sum + Number(sale.total || 0), 0);
+        
+        // Excluir pedidos cancelados y reembolsados
+        const validSales = salesData.filter((sale: any) => {
+          const status = sale.status?.toLowerCase() || '';
+          return status !== 'cancelled' && status !== 'canceled' && status !== 'refunded';
+        });
+        
+        const totalSales = validSales.length;
+        const totalRevenue = validSales.reduce((sum: number, sale: any) => sum + Number(sale.total || 0), 0);
         
         setProfileStats({
           totalSales,
