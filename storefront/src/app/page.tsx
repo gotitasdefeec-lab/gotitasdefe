@@ -32,10 +32,18 @@ async function getFeaturedProducts() {
 
 async function getCarouselSlides() {
   try {
-    const res = await fetch(`${BASE}/public/carousel`, { next: { revalidate: 3600 } });
-    if (!res.ok) return [] as any[];
-    return await res.json();
-  } catch (_) {
+    const res = await fetch(`${BASE}/public/carousel`, { 
+      cache: 'no-store' // Deshabilitar cache para siempre obtener las últimas imágenes
+    });
+    if (!res.ok) {
+      console.error('Error fetching carousel:', res.status, res.statusText);
+      return [] as any[];
+    }
+    const data = await res.json();
+    console.log('Carousel slides loaded:', data.length, 'slides');
+    return data;
+  } catch (error) {
+    console.error('Error in getCarouselSlides:', error);
     return [] as any[];
   }
 }

@@ -14,16 +14,22 @@ export default function HeroCarousel({ initialSlides }: { initialSlides?: Carous
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
-    if (initialSlides && initialSlides.length > 0) return; // ya viene del servidor
+    if (initialSlides && initialSlides.length > 0) {
+      console.log('HeroCarousel: Using initial slides from server:', initialSlides.length);
+      return; // ya viene del servidor
+    }
     const loadCarousel = async () => {
       try {
+        console.log('HeroCarousel: Fetching carousel data from API...');
         const carouselData = await carouselService.getCarousel();
+        console.log('HeroCarousel: Received carousel data:', carouselData);
         const transformedSlides = carouselData.map(slide => ({
           id: slide.id,
           imageUrl: slide.imageUrl || '/carousel-placeholder.svg',
           title: slide.title || '',
           description: slide.description || ''
         }));
+        console.log('HeroCarousel: Transformed slides:', transformedSlides.length);
         setSlides(transformedSlides);
       } catch (error) {
         console.error('Error loading carousel:', error);
