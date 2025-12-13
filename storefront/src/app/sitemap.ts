@@ -20,35 +20,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1,
     }));
 
-    // Fetch dynamic data
+    // Fetch dynamic data with timeout protection
     let products: any[] = [];
     let categories: any[] = [];
 
     try {
-        products = await productService.getProducts();
-    } catch (e) {
-        console.error('Error fetching products for sitemap', e);
+        // Set a timeout for the API call
+        const productsPromise = Promise.race([
+            productService.getProducts(),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Products fetch timeout')), 5000)
+            )
+        ]);
+        products = await productsPromise as any[];
+    } catch (e: any) {
+        console.warn('Sitemap: Could not fetch products, continuing with static routes only', e?.message || e);
+        // Continue without products - sitemap will still work with static routes
     }
 
     try {
-        categories = await categoryService.getCategories();
-    } catch (e) {
-        console.error('Error fetching categories for sitemap', e);
+        // Set a timeout for the API call
+        const categoriesPromise = Promise.race([
+            categoryService.getCategories(),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Categories fetch timeout')), 5000)
+            )
+        ]);
+        categories = await categoriesPromise as any[];
+    } catch (e: any) {
+        console.warn('Sitemap: Could not fetch categories, continuing with static routes only', e?.message || e);
+        // Continue without categories - sitemap will still work with static routes
     }
 
-    const productRoutes = products.map((product) => ({
+    const productRoutes = Array.isArray(products) ? products.map((product) => ({
         url: `${baseUrl}/products/${product.id}`,
         lastModified: new Date(product.updatedAt || new Date()),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
-    }));
+    })) : [];
 
-    const categoryRoutes = categories.map((category) => ({
+    const categoryRoutes = Array.isArray(categories) ? categories.map((category) => ({
         url: `${baseUrl}/products?category=${encodeURIComponent(category.name)}`,
         lastModified: new Date(category.updatedAt || new Date()),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
-    }));
+    })) : [];
 
     return [...routes, ...productRoutes, ...categoryRoutes];
 }
