@@ -119,16 +119,27 @@ export default function HeroCarousel({ initialSlides }: { initialSlides?: Carous
         >
           {slides.map((slide, index) => (
             <div key={slide.id} className="w-full flex-shrink-0 relative bg-gray-100">
-              <Image
-                src={slide.imageUrl}
-                alt={slide.title || 'Imagen del carrusel'}
-                fill
-                sizes="100vw"
-                priority={index === 0}
-                quality={80}
-                className="object-contain bg-white"
-                unoptimized
-              />
+              {slide.imageUrl.startsWith('data:') ? (
+                // Usar img nativo para imágenes base64
+                <img
+                  src={slide.imageUrl}
+                  alt={slide.title || 'Imagen del carrusel'}
+                  className="w-full h-full object-contain bg-white"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                />
+              ) : (
+                // Usar Image de Next.js para URLs remotas
+                <Image
+                  src={slide.imageUrl}
+                  alt={slide.title || 'Imagen del carrusel'}
+                  fill
+                  sizes="100vw"
+                  priority={index === 0}
+                  quality={80}
+                  className="object-contain bg-white"
+                  unoptimized
+                />
+              )}
               
               {/* Content Overlay - Only if there's actual content */}
               {(slide.title?.trim() || slide.description?.trim()) && (
