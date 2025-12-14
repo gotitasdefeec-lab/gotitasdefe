@@ -48,19 +48,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(baseUrl),
     title: {
-      default: general.name || 'Gotitas de Fe',
-      template: `%s | ${general.name || 'Gotitas de Fe'}`
+      default: general.name || 'Gotas de Fe',
+      template: `%s | ${general.name || 'Gotas de Fe'}`
     },
     description: general.description || 'Tienda en línea de productos religiosos y espirituales.',
-    keywords: ['tienda', 'ecommerce', 'religioso', 'espiritual', 'gotitas de fe'],
+    keywords: ['tienda', 'ecommerce', 'religioso', 'espiritual', 'gotas de fe'],
     authors: [{ name: general.name }],
     openGraph: {
       type: 'website',
       locale: 'es_EC',
       url: baseUrl,
-      title: general.name || 'Gotitas de Fe',
+      title: general.name || 'Gotas de Fe',
       description: general.description || 'Tienda en línea de productos religiosos y espirituales.',
-      siteName: general.name || 'Gotitas de Fe',
+      siteName: general.name || 'Gotas de Fe',
     },
     verification: {
       google: 'zrFsydo1FWgVscWTNkKScyCSGoltsELP1zrdxS5wNBI',
