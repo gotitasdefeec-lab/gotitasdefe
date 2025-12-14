@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { formatCurrency } from '@/utils/formatCurrency';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import {
   ArrowRightIcon 
 } from '@heroicons/react/24/outline';
 import { API_URL } from '@/services/api';
+import { storeService } from '@/services/storeService';
 
 // Función de ayuda para obtener la URL correcta
 const getImageUrl = (imagePath?: string | null) => {
@@ -39,6 +40,30 @@ export default function CartPage() {
     getTotalItems 
   } = useCart();
 
+  const [shippingThreshold, setShippingThreshold] = useState(50);
+  const [shippingCost, setShippingCost] = useState(5.99);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await storeService.getStoreConfig();
+        if (config.shipping) {
+          // Prefer freeShippingThreshold, fallback to freeShippingMin, default to 50
+          const threshold = config.shipping.freeShippingThreshold ?? config.shipping.freeShippingMin ?? 50;
+          setShippingThreshold(Number(threshold));
+          
+          // Also update standard cost if available
+          if (config.shipping.standardCost !== undefined) {
+            setShippingCost(Number(config.shipping.standardCost));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching store config:', error);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   const formatPrice = (price: number) => formatCurrency(price, 'USD', 'es-US');
 
   if (items.length === 0) {
@@ -64,7 +89,7 @@ export default function CartPage() {
   }
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal >= 50 ? 0 : 5.99; // Envío gratis por compras mayores a $50
+  const shipping = subtotal >= shippingThreshold ? 0 : shippingCost; // Envío gratis por compras mayores al umbral configurado
   const tax = 0; // Impuestos deshabilitados por defecto
   const total = subtotal + shipping + tax;
 
@@ -195,9 +220,9 @@ export default function CartPage() {
                   </span>
                 </div>
                 
-                {shipping > 0 && subtotal < 50 && (
+                {shipping > 0 && subtotal < shippingThreshold && (
                   <div className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md p-3">
-                    💡 ¡Agrega {formatPrice(50 - subtotal)} más para envío gratis!
+                    💡 ¡Agrega {formatPrice(shippingThreshold - subtotal)} más para envío gratis!
                   </div>
                 )}
                 
@@ -236,7 +261,7 @@ export default function CartPage() {
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex items-start gap-2">
                     <span>✓</span>
-                    <span>Envío gratis en compras mayores a $50</span>
+                    <span>Envío gratis en compras mayores a {formatPrice(shippingThreshold)}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span>✓</span>
