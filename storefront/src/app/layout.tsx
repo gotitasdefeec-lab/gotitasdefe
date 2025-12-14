@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', weight: ['300', '400'
 
 async function getStoreConfig() {
   try {
-    const res = await fetch(`${BASE}/public/store/config`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${BASE}/public/store/config`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to load store config: ${res.status}`);
     return await res.json();
   } catch (_) {
