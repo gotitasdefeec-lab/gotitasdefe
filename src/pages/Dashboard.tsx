@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { 
-  Grid, 
-  Typography, 
-  Card, 
-  CardContent, 
+import {
+  Grid,
+  Typography,
+  Card,
+  CardContent,
   Box,
   IconButton,
   List,
@@ -126,6 +126,9 @@ const Dashboard = () => {
     const buckets = new Array(7).fill(0);
     for (const o of orders) {
       if (!o.date) continue;
+      // Filter out cancelled or refunded orders
+      if (o.status === 'cancelled' || o.status === 'refunded') continue;
+
       const d = new Date(o.date);
       const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays >= 0 && diffDays < 7) {
@@ -200,6 +203,9 @@ const Dashboard = () => {
     let orders7 = 0;
     const customers = new Set<string>();
     for (const o of orders) {
+      // Filter out cancelled or refunded orders for totals
+      if (o.status === 'cancelled' || o.status === 'refunded') continue;
+
       const total = Number(o.total) || 0;
       const d = o.date ? new Date(o.date) : null;
       if (d) {
@@ -239,16 +245,16 @@ const Dashboard = () => {
 
       <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
         {/* Tarjetas de estadísticas */}
-  <Grid item xs={6} sm={6} md={3} lg={3} xl={3}>
+        <Grid item xs={6} sm={6} md={3} lg={3} xl={3}>
           <StatsCard>
             <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 }, '&:last-child': { pb: { xs: 1.5, sm: 2, md: 3 } } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: { xs: 120, sm: 140, md: 160 }, 
-                gap: { xs: 0.5, sm: 1 } 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: { xs: 120, sm: 140, md: 160 },
+                gap: { xs: 0.5, sm: 1 }
               }}>
                 <Box sx={{
                   width: { xs: 36, sm: 42, md: 48 },
@@ -263,25 +269,25 @@ const Dashboard = () => {
                 }}>
                   <AttachMoney sx={{ color: '#fff', fontSize: { xs: 20, sm: 24, md: 28 } }} />
                 </Box>
-                <Typography 
-                  color="textSecondary" 
-                  variant="subtitle2" 
-                  gutterBottom 
-                  sx={{ 
-                    fontWeight: 600, 
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 600,
                     textAlign: 'center',
                     fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
                   }}
                 >
                   Ventas Totales
                 </Typography>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    mb: 0.5, 
-                    fontWeight: 800, 
-                    color: 'primary.main', 
-                    textAlign: 'center', 
+                <Typography
+                  variant="h4"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    textAlign: 'center',
                     letterSpacing: '-0.02em',
                     fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' },
                   }}
@@ -290,12 +296,12 @@ const Dashboard = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <TrendingUp color="success" sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
-                  <Typography 
-                    variant="body2" 
-                    color="success.main" 
-                    sx={{ 
-                      fontWeight: 700, 
-                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
+                  <Typography
+                    variant="body2"
+                    color="success.main"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
                     }}
                   >
                     +15.3%
@@ -309,13 +315,13 @@ const Dashboard = () => {
         <Grid item xs={6} sm={6} md={3} lg={3} xl={3}>
           <StatsCard>
             <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 }, '&:last-child': { pb: { xs: 1.5, sm: 2, md: 3 } } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: { xs: 120, sm: 140, md: 160 }, 
-                gap: { xs: 0.5, sm: 1 } 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: { xs: 120, sm: 140, md: 160 },
+                gap: { xs: 0.5, sm: 1 }
               }}>
                 <Box sx={{
                   width: { xs: 36, sm: 42, md: 48 },
@@ -330,25 +336,25 @@ const Dashboard = () => {
                 }}>
                   <ShoppingCart sx={{ color: '#fff', fontSize: { xs: 20, sm: 24, md: 28 } }} />
                 </Box>
-                <Typography 
-                  color="textSecondary" 
-                  variant="subtitle2" 
-                  gutterBottom 
-                  sx={{ 
-                    fontWeight: 600, 
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 600,
                     textAlign: 'center',
                     fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
                   }}
                 >
                   Pedidos Nuevos
                 </Typography>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    mb: 0.5, 
-                    fontWeight: 800, 
-                    color: 'primary.main', 
-                    textAlign: 'center', 
+                <Typography
+                  variant="h4"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    textAlign: 'center',
                     letterSpacing: '-0.02em',
                     fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' },
                   }}
@@ -357,12 +363,12 @@ const Dashboard = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <TrendingUp color="success" sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
-                  <Typography 
-                    variant="body2" 
-                    color="success.main" 
-                    sx={{ 
-                      fontWeight: 700, 
-                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
+                  <Typography
+                    variant="body2"
+                    color="success.main"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
                     }}
                   >
                     +8.4%
@@ -376,13 +382,13 @@ const Dashboard = () => {
         <Grid item xs={6} sm={6} md={3} lg={3} xl={3}>
           <StatsCard>
             <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 }, '&:last-child': { pb: { xs: 1.5, sm: 2, md: 3 } } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: { xs: 120, sm: 140, md: 160 }, 
-                gap: { xs: 0.5, sm: 1 } 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: { xs: 120, sm: 140, md: 160 },
+                gap: { xs: 0.5, sm: 1 }
               }}>
                 <Box sx={{
                   width: { xs: 36, sm: 42, md: 48 },
@@ -397,25 +403,25 @@ const Dashboard = () => {
                 }}>
                   <People sx={{ color: '#fff', fontSize: { xs: 20, sm: 24, md: 28 } }} />
                 </Box>
-                <Typography 
-                  color="textSecondary" 
-                  variant="subtitle2" 
-                  gutterBottom 
-                  sx={{ 
-                    fontWeight: 600, 
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 600,
                     textAlign: 'center',
                     fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
                   }}
                 >
                   Clientes Activos
                 </Typography>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    mb: 0.5, 
-                    fontWeight: 800, 
-                    color: 'primary.main', 
-                    textAlign: 'center', 
+                <Typography
+                  variant="h4"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    textAlign: 'center',
                     letterSpacing: '-0.02em',
                     fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' },
                   }}
@@ -424,12 +430,12 @@ const Dashboard = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <TrendingDown color="error" sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
-                  <Typography 
-                    variant="body2" 
-                    color="error.main" 
-                    sx={{ 
-                      fontWeight: 700, 
-                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
+                  <Typography
+                    variant="body2"
+                    color="error.main"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
                     }}
                   >
                     -2.5%
@@ -443,13 +449,13 @@ const Dashboard = () => {
         <Grid item xs={6} sm={6} md={3} lg={3} xl={3}>
           <StatsCard>
             <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 }, '&:last-child': { pb: { xs: 1.5, sm: 2, md: 3 } } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                minHeight: { xs: 120, sm: 140, md: 160 }, 
-                gap: { xs: 0.5, sm: 1 } 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: { xs: 120, sm: 140, md: 160 },
+                gap: { xs: 0.5, sm: 1 }
               }}>
                 <Box sx={{
                   width: { xs: 36, sm: 42, md: 48 },
@@ -464,25 +470,25 @@ const Dashboard = () => {
                 }}>
                   <Inventory sx={{ color: '#fff', fontSize: { xs: 20, sm: 24, md: 28 } }} />
                 </Box>
-                <Typography 
-                  color="textSecondary" 
-                  variant="subtitle2" 
-                  gutterBottom 
-                  sx={{ 
-                    fontWeight: 600, 
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 600,
                     textAlign: 'center',
                     fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
                   }}
                 >
                   Productos Activos
                 </Typography>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    mb: 0.5, 
-                    fontWeight: 800, 
-                    color: 'primary.main', 
-                    textAlign: 'center', 
+                <Typography
+                  variant="h4"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    textAlign: 'center',
                     letterSpacing: '-0.02em',
                     fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' },
                   }}
@@ -491,12 +497,12 @@ const Dashboard = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <TrendingUp color="success" sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
-                  <Typography 
-                    variant="body2" 
-                    color="success.main" 
-                    sx={{ 
-                      fontWeight: 700, 
-                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
+                  <Typography
+                    variant="body2"
+                    color="success.main"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
                     }}
                   >
                     +12.7%
@@ -508,7 +514,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Gráficas */}
-  <Grid item xs={12} md={8} lg={8} xl={9}>
+        <Grid item xs={12} md={8} lg={8} xl={9}>
           <Card sx={{
             borderRadius: { xs: 12, sm: 16, md: 20 },
             background: (theme) => theme.palette.mode === 'dark' ? 'rgba(49,46,129,0.55)' : 'rgba(255,255,255,0.55)',
@@ -558,7 +564,7 @@ const Dashboard = () => {
           </Card>
         </Grid>
 
-  <Grid item xs={12} md={4} lg={4} xl={3}>
+        <Grid item xs={12} md={4} lg={4} xl={3}>
           <Card sx={{
             borderRadius: { xs: 12, sm: 16, md: 20 },
             background: (theme) => theme.palette.mode === 'dark' ? 'rgba(49,46,129,0.55)' : 'rgba(255,255,255,0.55)',
@@ -600,7 +606,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Órdenes Recientes */}
-  <Grid item xs={12} md={6} lg={6} xl={6}>
+        <Grid item xs={12} md={6} lg={6} xl={6}>
           <Card sx={{
             borderRadius: { xs: 12, sm: 16, md: 20 },
             background: (theme) => theme.palette.mode === 'dark' ? 'rgba(49,46,129,0.55)' : 'rgba(255,255,255,0.55)',
@@ -610,10 +616,10 @@ const Dashboard = () => {
             transition: 'all 0.3s',
           }}>
             <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
                   fontWeight: 700,
                   fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   mb: { xs: 1.5, sm: 2 }
@@ -632,11 +638,11 @@ const Dashboard = () => {
                           order.status === 'completed'
                             ? 'success'
                             : order.status === 'pending'
-                            ? 'warning'
-                            : 'info'
+                              ? 'warning'
+                              : 'info'
                         }
                         size="small"
-                        sx={{ 
+                        sx={{
                           fontWeight: 600,
                           fontSize: { xs: '0.7rem', sm: '0.75rem' }
                         }}
@@ -657,9 +663,9 @@ const Dashboard = () => {
                     }}
                   >
                     <ListItemAvatar>
-                      <Avatar sx={{ 
-                        bgcolor: 'primary.light', 
-                        color: '#fff', 
+                      <Avatar sx={{
+                        bgcolor: 'primary.light',
+                        color: '#fff',
                         fontWeight: 700,
                         width: { xs: 32, sm: 36, md: 40 },
                         height: { xs: 32, sm: 36, md: 40 },
@@ -670,7 +676,7 @@ const Dashboard = () => {
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <span style={{ 
+                        <span style={{
                           fontWeight: 600,
                           fontSize: window.innerWidth < 600 ? '0.85rem' : '1rem'
                         }}>
@@ -678,7 +684,7 @@ const Dashboard = () => {
                         </span>
                       }
                       secondary={
-                        <span style={{ 
+                        <span style={{
                           color: '#64748b',
                           fontSize: window.innerWidth < 600 ? '0.75rem' : '0.875rem'
                         }}>
@@ -694,7 +700,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Alertas de Stock */}
-  <Grid item xs={12} md={6} lg={6} xl={6}>
+        <Grid item xs={12} md={6} lg={6} xl={6}>
           <Card sx={{
             borderRadius: { xs: 12, sm: 16, md: 20 },
             background: (theme) => theme.palette.mode === 'dark' ? 'rgba(49,46,129,0.55)' : 'rgba(255,255,255,0.55)',
@@ -704,10 +710,10 @@ const Dashboard = () => {
             transition: 'all 0.3s',
           }}>
             <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
                   fontWeight: 700,
                   fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   mb: { xs: 1.5, sm: 2 }
@@ -717,26 +723,26 @@ const Dashboard = () => {
               </Typography>
               <List sx={{ p: 0 }}>
                 {lowStockItems.map((item) => (
-                  <ListItem 
-                    key={item.id} 
-                    sx={{ 
-                      borderRadius: 2, 
-                      mb: 1, 
+                  <ListItem
+                    key={item.id}
+                    sx={{
+                      borderRadius: 2,
+                      mb: 1,
                       px: { xs: 1.5, sm: 2 },
                       py: { xs: 1, sm: 1.5 },
-                      background: 'rgba(255,255,255,0.10)', 
-                      boxShadow: '0 2px 8px 0 rgba(99,102,241,0.07)', 
-                      transition: 'all 0.2s', 
-                      '&:hover': { 
-                        background: 'rgba(253,186,116,0.13)', 
-                        transform: 'scale(1.02)' 
-                      } 
+                      background: 'rgba(255,255,255,0.10)',
+                      boxShadow: '0 2px 8px 0 rgba(99,102,241,0.07)',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        background: 'rgba(253,186,116,0.13)',
+                        transform: 'scale(1.02)'
+                      }
                     }}
                   >
                     <ListItemAvatar>
-                      <Avatar sx={{ 
-                        bgcolor: 'warning.light', 
-                        color: '#fff', 
+                      <Avatar sx={{
+                        bgcolor: 'warning.light',
+                        color: '#fff',
                         fontWeight: 700,
                         width: { xs: 32, sm: 36, md: 40 },
                         height: { xs: 32, sm: 36, md: 40 },
@@ -746,7 +752,7 @@ const Dashboard = () => {
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <span style={{ 
+                        <span style={{
                           fontWeight: 600,
                           fontSize: window.innerWidth < 600 ? '0.85rem' : '1rem'
                         }}>
@@ -758,19 +764,19 @@ const Dashboard = () => {
                           <LinearProgress
                             variant="determinate"
                             value={(item.stock / item.minStock) * 100}
-                            sx={{ 
-                              flexGrow: 1, 
-                              mr: { xs: 1, sm: 2 }, 
-                              borderRadius: 2, 
-                              height: { xs: 6, sm: 8 }, 
-                              background: 'rgba(253,186,116,0.13)' 
+                            sx={{
+                              flexGrow: 1,
+                              mr: { xs: 1, sm: 2 },
+                              borderRadius: 2,
+                              height: { xs: 6, sm: 8 },
+                              background: 'rgba(253,186,116,0.13)'
                             }}
                             color="warning"
                           />
-                          <Box 
-                            component="span" 
-                            sx={{ 
-                              color: 'text.secondary', 
+                          <Box
+                            component="span"
+                            sx={{
+                              color: 'text.secondary',
                               fontWeight: 600,
                               fontSize: { xs: '0.75rem', sm: '0.875rem' }
                             }}
