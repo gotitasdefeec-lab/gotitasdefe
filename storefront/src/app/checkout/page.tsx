@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   const [taxRate, setTaxRate] = useState<number>(0);
   const [storeName, setStoreName] = useState<string>('');
   const [logoUrl, setLogoUrl] = useState<string>('');
-  const [paypalClientId, setPaypalClientId] = useState<string>('');
+  const [paypalClientId, setPaypalClientId] = useState<string>(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AeDBOtykj0vTeZ9ucih1M-JsSphRIiBcfGr8h9M5eG_vUwa4wrLMCPaNWVg8HcPUYvE4cvE0AQ4S6RwB');
   const [formData, setFormData] = useState<CheckoutFormData>({
     firstName: '',
     lastName: '',
