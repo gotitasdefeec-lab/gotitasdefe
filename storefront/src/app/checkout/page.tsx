@@ -134,13 +134,17 @@ export default function CheckoutPage() {
         setCurrency(config.general?.currency || 'USD');
         setStoreName(config.general?.name || 'Checkout');
 
-        // Load PayPal Client ID if available
+        // Force production client ID to resolve potential backend/env mismatches immediately
+        setPaypalClientId('AeDBOtykj0vTeZ9ucih1M-JsSphRIiBcfGr8h9M5eG_vUwa4wrLMCPaNWVg8HcPUYvE4cvE0AQ4S6RwB');
+
+        /* Dynamic loading temporarily disabled to ensure production ID usage
         if ((config.payment as any)?.paypalClientId) {
           setPaypalClientId((config.payment as any).paypalClientId);
         } else {
-          // Fallback to sandbox test client ID for development
-          setPaypalClientId('test');
+          // Fallback to production client ID
+          setPaypalClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AeDBOtykj0vTeZ9ucih1M-JsSphRIiBcfGr8h9M5eG_vUwa4wrLMCPaNWVg8HcPUYvE4cvE0AQ4S6RwB');
         }
+        */
 
         if (config.payment?.methods && Array.isArray(config.payment.methods)) {
           if (config.payment.methods.length > 0 && typeof config.payment.methods[0] === 'object' && 'enabled' in (config.payment.methods[0] as any)) {

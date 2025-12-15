@@ -1,0 +1,17 @@
+﻿# Database
+DATABASE_URL="postgresql://postgres:gotitasdefe@localhost:5432/administrador"
+
+# PayPal Configuration
+PAYPAL_CLIENT_ID=AeDBOtykj0vTeZ9ucih1M-JsSphRIiBcfGr8h9M5eG_vUwa4wrLMCPaNWVg8HcPUYvE4cvE0AQ4S6RwB
+PAYPAL_CLIENT_SECRET=EEP1tgN31CuVxpN80DxhbDxPT0lxBZ6eYfy-61NPiTcplzPgJuE7aVfH29kXjHN75sfB0uSBoOFcpE9t
+PAYPAL_MODE=live
+
+# CORS
+CORS_ORIGINS=https://vitaminic-yusuf-unnourishing.ngrok-free.dev,http://localhost:3000,http://localhost:3001,https://gotitasdefe.vercel.app,https://gotitasdefe-tienda-9b9vev7cm-gotitasdefes-projects.vercel.app,https://www.gotasdefe.com,https://gotasdefe.com,https://gotitasdefe-tienda-h20q26na4-gotitasdefes-projects.vercel.app,https://api.gotasdefe.com
+
+# VAPID Keys for Push Notifications
+VAPID_PUBLIC_KEY=BMfxMkupwZdc8v7vcHxmtmrdy669W0diEbOR7ozWZirhdMxHpsm-D0c1K-ijekHSQFgbUb9c5nAGv6OsK_7-5SE
+VAPID_PRIVATE_KEY=pLuh4TWQgNDRML1cVuUawN5kyb_FVgsDJz30yBoI-2o
+
+# JWT Secret for Authentication
+JWT_SECRET=tu-secreto-jwt-super-seguro-cambialo-en-produccion-12345
