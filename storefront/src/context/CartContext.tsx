@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types';
 
+import { productService } from '@/services/productService';
+
 interface CartContextType {
   items: CartItem[];
   addItem: (product: Product, quantity?: number) => void;
@@ -29,38 +31,74 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount and refresh prices
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        // Ensure parsed cart is an array
-        if (Array.isArray(parsedCart)) {
-          setItems(parsedCart);
-        } else {
-          console.warn('Invalid cart data in localStorage, resetting cart');
-          setItems([]);
+    let mounted = true;
+
+    const loadAndRefreshCart = async () => {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          const parsedCart = JSON.parse(savedCart);
+          if (Array.isArray(parsedCart)) {
+            // Initial set from local storage
+            if (mounted) setItems(parsedCart);
+
+            // Fetch fresh data for each product
+            const updatedItems = await Promise.all(
+              parsedCart.map(async (item: CartItem) => {
+                try {
+                  const freshProduct = await productService.getProduct(item.product.id);
+                  if (freshProduct) {
+                    return {
+                      ...item,
+                      product: {
+                        ...freshProduct,
+                        price: Number(freshProduct.price)
+                      }
+                    };
+                  }
+                  return item;
+                } catch (e) {
+                  return item;
+                }
+              })
+            );
+
+            if (mounted) {
+              setItems(updatedItems);
+            }
+          } else {
+            localStorage.removeItem('cart');
+          }
+        } catch (error) {
+          console.error('Error loading cart:', error);
           localStorage.removeItem('cart');
         }
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-        setItems([]);
-        localStorage.removeItem('cart');
       }
-    }
+      if (mounted) setIsLoaded(true);
+    };
+
+    loadAndRefreshCart();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Save cart to localStorage whenever items change
+  // Save cart to localStorage whenever items change, but only after initial load
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items));
-  }, [items]);
+    if (isLoaded) {
+      localStorage.setItem('cart', JSON.stringify(items));
+    }
+  }, [items, isLoaded]);
 
   const addItem = useCallback((product: Product, quantity: number = 1) => {
     setItems(currentItems => {
       const existingItem = currentItems.find(item => item.product.id === product.id);
-      
+
       if (existingItem) {
         return currentItems.map(item =>
           item.product.id === product.id
@@ -68,10 +106,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             : item
         );
       } else {
-        return [...currentItems, { 
+        return [...currentItems, {
           id: Date.now(), // Simple ID generation
-          product, 
-          quantity 
+          product,
+          quantity
         }];
       }
     });
