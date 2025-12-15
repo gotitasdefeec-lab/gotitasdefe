@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class StoreService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // Store General
   async getGeneral() {
@@ -70,7 +70,18 @@ export class StoreService {
 
   // Store Payment
   async getPayment() {
-    return this.prisma.storePayment.findUnique({ where: { id: 1 } });
+    const payment = await this.prisma.storePayment.findUnique({ where: { id: 1 } });
+
+    // Inject PayPal Client ID from environment if available
+    // This ensures frontend uses the same credentials as backend
+    if (process.env.PAYPAL_CLIENT_ID) {
+      return {
+        ...payment,
+        paypalClientId: process.env.PAYPAL_CLIENT_ID
+      } as any;
+    }
+
+    return payment;
   }
 
   async updatePayment(data: any) {
