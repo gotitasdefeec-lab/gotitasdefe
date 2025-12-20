@@ -28,4 +28,8 @@ async create(data: { name: string }) {
       where: { id },
     });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 2349cf921eb9e3c60c1bd5ff6c6e70e6736fd273

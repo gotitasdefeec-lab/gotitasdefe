@@ -47,6 +47,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: './',
+    },
     title: {
       default: general.name || 'Gotas de Fe',
       template: `%s | ${general.name || 'Gotas de Fe'}`
