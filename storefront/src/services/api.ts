@@ -1,63 +1,64 @@
 import axios from 'axios';
 
-// Bases configurables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.gotasdefe.com'; // Backend NestJS
-const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com'; // Backend NestJS
-// Named export for building absolute asset URLs in UI components
-export const API_URL = PUBLIC_API_BASE_URL;
+// 1. Definir la URL base.
+// En producción, buscará la variable de entorno 'NEXT_PUBLIC_API_URL'.
+// Si no la encuentra, usará 'https://api.gotasdefe.com' como respaldo.
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.gotasdefe.com';
 
-// Create axios instance
-// Cliente para JSON Server (admin/mock)
+// 2. Crear instancias de Axios
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': '69420', // Bypass ngrok browser warning
+    // Este header ayuda si alguna vez usas ngrok, no afecta en producción
+    'ngrok-skip-browser-warning': '69420',
   },
 });
 
-// Cliente para el backend público (Nest)
 export const publicApi = axios.create({
-  baseURL: PUBLIC_API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': '69420', // Bypass ngrok browser warning
+    'ngrok-skip-browser-warning': '69420',
   },
 });
 
-// Customer authentication (separate from admin)
+// 3. Manejo de Autenticación de Clientes (Customer Token)
 let customerToken: string | null = null;
-
 
 export const setCustomerToken = (token: string) => {
   customerToken = token;
-  localStorage.setItem('customer_token', token);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('customer_token', token);
+  }
+  // Configurar el header para futuras peticiones
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   publicApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 };
 
-
 export const removeCustomerToken = () => {
   customerToken = null;
-  localStorage.removeItem('customer_token');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('customer_token');
+  }
   delete api.defaults.headers.common['Authorization'];
   delete publicApi.defaults.headers.common['Authorization'];
 };
 
-
 export const getCustomerToken = (): string | null => {
   if (customerToken) return customerToken;
   if (typeof window !== 'undefined') {
-    customerToken = localStorage.getItem('customer_token');
-    if (customerToken) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${customerToken}`;
-      publicApi.defaults.headers.common['Authorization'] = `Bearer ${customerToken}`;
+    const stored = localStorage.getItem('customer_token');
+    if (stored) {
+      // Si encontramos el token en storage, lo restauramos en axios
+      setCustomerToken(stored);
+      return stored;
     }
   }
-  return customerToken;
+  return null;
 };
 
-// Initialize token on app start
+// Restaurar token al cargar la app (solo en el navegador)
 if (typeof window !== 'undefined') {
   const token = localStorage.getItem('customer_token');
   if (token) {
