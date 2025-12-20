@@ -8,7 +8,7 @@ import { useCartDrawer } from '@/components/layout/Layout';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.gotasdefe.com';
 
 // Helper para construir una URL de imagen válida (base64, absoluta o ruta relativa del backend)
 const getImageUrl = (imagePath?: string | null) => {
