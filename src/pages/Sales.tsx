@@ -1324,13 +1324,21 @@ const Sales = () => {
                   if (existsIdx >= 0) {
                     items[existsIdx].quantity += addProductQty;
                   } else {
-                    const img = prod.image || (Array.isArray(prod.images) ? prod.images[0] : undefined);
+                    // Extraer la imagen como string (puede ser objeto con url o string directo)
+                    let imgStr = prod.image;
+                    if (typeof imgStr === 'object' && imgStr !== null) {
+                      imgStr = imgStr.url || imgStr.path || undefined;
+                    }
+                    if (!imgStr && Array.isArray(prod.images) && prod.images.length > 0) {
+                      const firstImg = prod.images[0];
+                      imgStr = typeof firstImg === 'string' ? firstImg : (firstImg?.url || firstImg?.path);
+                    }
                     items.push({ 
                       productId: prod.id, 
                       name: prod.name, 
                       price: prod.price, 
                       quantity: addProductQty,
-                      image: img,
+                      image: imgStr,
                       images: prod.images
                     });
                   }
@@ -1357,12 +1365,25 @@ const Sales = () => {
                   <TableBody>
                     {selected.items.map((it: any, idx: number) => {
                       const prod = products.find((p: any) => String(p.id) === String(it.productId));
-                      const img = (
-                        prod?.image ||
-                        (Array.isArray(prod?.images) ? prod.images[0] : undefined) ||
-                        it?.image ||
-                        (Array.isArray(it?.images) ? it.images[0] : undefined)
-                      );
+                      // Obtener imagen como string
+                      let img = prod?.image;
+                      if (typeof img === 'object' && img !== null) {
+                        img = img.url || img.path || undefined;
+                      }
+                      if (!img && Array.isArray(prod?.images) && prod.images.length > 0) {
+                        const firstImg = prod.images[0];
+                        img = typeof firstImg === 'string' ? firstImg : (firstImg?.url || firstImg?.path);
+                      }
+                      if (!img) {
+                        img = it?.image;
+                        if (typeof img === 'object' && img !== null) {
+                          img = img.url || img.path || undefined;
+                        }
+                      }
+                      if (!img && Array.isArray(it?.images) && it.images.length > 0) {
+                        const firstImg = it.images[0];
+                        img = typeof firstImg === 'string' ? firstImg : (firstImg?.url || firstImg?.path);
+                      }
                       return (
                         <TableRow key={idx}>
                           <TableCell>
