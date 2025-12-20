@@ -40,8 +40,6 @@ import {
   DialogContentText,
 } from '@mui/material';
 
-
-
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -114,13 +112,20 @@ const Products = () => {
   });
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await productsApi.getAll();
-        // El backend NestJS devuelve directamente el array, no encapsulado en data
-        const productsData = Array.isArray(res) ? res : (res.data || []);
+        // Carga simultánea para evitar desincronización
+        const [prodRes, catRes] = await Promise.all([
+          productsApi.getAll(),
+          categoriesApi.getAll()
+        ]);
+
+        const categoriesData = Array.isArray(catRes) ? catRes : (catRes.data || []);
+        setCategories(categoriesData as { id: number, name: string }[]);
+
+        const productsData = Array.isArray(prodRes) ? prodRes : (prodRes.data || []);
         const list: Product[] = (productsData as any[]).map((p: any) => ({
           id: Number(p.id),
           name: p.name,
@@ -135,44 +140,38 @@ const Products = () => {
         }));
         setProducts(list);
       } catch (e: any) {
-        setError(e?.message || 'Error al cargar productos');
+        setError(e?.message || 'Error al cargar datos');
       } finally {
         setLoading(false);
       }
     };
-    const fetchCategories = async () => {
-      try {
-        const res = await categoriesApi.getAll();
-        // El backend NestJS devuelve directamente el array, no encapsulado en data
-        const categoriesData = Array.isArray(res) ? res : (res.data || []);
-        setCategories(categoriesData as { id: number, name: string }[]);
-      } catch { }
-    };
-    fetchProducts();
-    fetchCategories();
+    fetchData();
   }, []);
 
-  // Devuelve la URL correcta para una imagen que puede ser base64, absoluta o ruta relativa del API
+  // --- CORRECCIÓN 1: Helper para Imágenes robusto ---
   const getImageUrl = (imagePath?: string | null) => {
-    if (!imagePath) return undefined;
-    if (typeof imagePath !== 'string') return undefined;
+    if (!imagePath || typeof imagePath !== 'string') return 'https://placehold.co/200x200';
     const path = imagePath.trim();
-    // base64
-    if (path.startsWith('data:image')) return path;
-    // absolutas: reescribe via.placeholder.com -> placehold.co preservando tamaño si es posible
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      if (path.includes('via.placeholder.com')) {
-        const m = path.match(/via\.placeholder\.com\/([0-9]+(?:x[0-9]+)?)/);
-        const size = m && m[1] ? m[1] : '200x200';
-        return `https://placehold.co/${size}`;
-      }
+    
+    // Si es base64 o URL completa
+    if (path.startsWith('data:image') || path.startsWith('http')) {
+      if (path.includes('via.placeholder.com')) return 'https://placehold.co/200x200';
       return path;
     }
-    // relativa del backend
-    return `${API_URL}${path}`;
+    
+    // Ruta relativa: aseguramos que se una bien con la API_URL
+    return `${API_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
   };
 
-  // categorías dinámicas desde la API
+  // --- CORRECCIÓN 2: Helper para obtener Nombre de Categoría ---
+  // Si el producto tiene guardado el ID "1", esto buscará "Ropa"
+  const getCategoryName = (catValue: string | number) => {
+    if (!catValue) return 'Sin categoría';
+    const found = categories.find(c => String(c.id) === String(catValue) || c.name === catValue);
+    if (found) return found.name;
+    return String(catValue);
+  };
+
   const sortOptions = [
     { label: 'Nombre (A-Z)', value: 'name_asc' },
     { label: 'Nombre (Z-A)', value: 'name_desc' },
@@ -200,13 +199,17 @@ const Products = () => {
 
   const handleEditProduct = (product: Product) => {
     setCurrentProduct(product);
+    // --- CORRECCIÓN 3: Convertir ID a Nombre al editar ---
+    // Esto hace que el dropdown (Select) reconozca el valor actual
+    const catName = getCategoryName(product.category);
+    
     setForm({
       name: product.name,
       sku: product.sku,
       price: product.price,
       stock: product.stock,
       minStock: product.minStock ?? 10,
-      category: product.category,
+      category: catName, 
       description: product.description || '',
       status: product.status || 'active',
       images: product.images || [],
@@ -244,11 +247,9 @@ const Products = () => {
         );
         setSnackbar({ open: true, message: 'Producto actualizado', severity: 'success' });
       } else {
-        const maxId = products.reduce((max, p) => p.id && p.id > max ? p.id : max, 0);
-        const productWithId = { ...payload, id: maxId + 1 };
-        const { id, ...productData } = productWithId;
-        const res = await productsApi.create(productData);
-        const created = Array.isArray(res) ? res[0] : (res.data || res) as Product;
+        const res = await productsApi.create(payload);
+        const created = Array.isArray(res) ? res[0] : (res.data || res);
+        // Construimos el objeto completo para la UI
         const newProduct: Product = {
           id: Number(created.id),
           name: created.name,
@@ -639,9 +640,10 @@ const Products = () => {
                   color={product.stock > (product.minStock || 10) ? 'success' : 'warning'}
                   sx={{ mr: 1 }}
                 />
+                {/* CORRECCIÓN: Usar getCategoryName */}
                 <Chip
                   size="small"
-                  label={product.category}
+                  label={getCategoryName(product.category)}
                   variant="outlined"
                 />
               </Box>
@@ -708,9 +710,10 @@ const Products = () => {
               </TableCell>
               <TableCell>{product.minStock || 10}</TableCell>
               <TableCell>
+                {/* CORRECCIÓN: Usar getCategoryName */}
                 <Chip
                   size="small"
-                  label={product.category}
+                  label={getCategoryName(product.category)}
                   variant="outlined"
                 />
               </TableCell>
