@@ -46,7 +46,8 @@ model Product {
   images      Json?       @default("[]")
   inventory   Inventory?
   orderItems  OrderItem[]
-  categoryRef Category    @relation(fields: [category], references: [name])
+ // CORREGIDO: onUpdate: Cascade permite renombrar categorías sin error
+  categoryRef Category    @relation(fields: [category], references: [name], onUpdate: Cascade)
 
   @@map("products")
 }
