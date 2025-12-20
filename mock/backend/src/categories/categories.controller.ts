@@ -1,7 +1,26 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Patch, 
+  Param, 
+  Delete, 
+  UseGuards, 
+  ParseIntPipe 
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty } from 'class-validator';
 import { CategoriesService } from './categories.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+// --- Definimos el DTO aquí mismo para que funcione la validación ---
+export class CategoryDto {
+  @ApiProperty({ example: 'Calzado', description: 'Nombre de la categoría' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
 
 @ApiTags('categories')
 @Controller('categories')
@@ -15,9 +34,10 @@ export class CategoriesController {
   findAll() {
     return this.categoriesService.findAll();
   }
-@Post()
+
+  @Post()
   @ApiOperation({ summary: 'Create a category' })
-  create(@Body() data: { name: string }) {
+  create(@Body() data: CategoryDto) {
     return this.categoriesService.create(data);
   }
 
@@ -25,7 +45,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Update a category' })
   update(
     @Param('id', ParseIntPipe) id: number, 
-    @Body() data: { name: string }
+    @Body() data: CategoryDto
   ) {
     return this.categoriesService.update(id, data);
   }
