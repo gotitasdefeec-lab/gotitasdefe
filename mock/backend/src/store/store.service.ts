@@ -5,32 +5,64 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StoreService {
   constructor(private prisma: PrismaService) { }
 
-  // Store General
+  // --- ARREGLO AQUÍ: Store General ---
   async getGeneral() {
     try {
       const general = await this.prisma.storeGeneral.findUnique({ where: { id: 1 } });
+      
+      // Si no existe, devolvemos un objeto por defecto PERO con todos los campos necesarios
       if (!general) {
-        return { id: 1, name: 'Tienda', email: '', phone: '', address: '', currency: 'USD' } as any;
+        return { 
+          id: 1, 
+          name: 'Tienda', 
+          email: '', 
+          phone: '', 
+          address: '', 
+          currency: 'USD',
+          about: '',   // <--- IMPORTANTE: Agregado
+          contact: ''  // <--- IMPORTANTE: Agregado
+        } as any;
       }
-      return { ...general, currency: (general as any).currency || 'USD' };
+      
+      return { 
+        ...general, 
+        currency: (general as any).currency || 'USD',
+        // Aseguramos que nunca sean null/undefined
+        about: (general as any).about || '',
+        contact: (general as any).contact || ''
+      };
+
     } catch (err: any) {
-      // En entornos donde la BD remota aún no tiene la columna `currency`,
-      // la consulta Prisma puede fallar. Intentamos una consulta raw como
-      // fallback y si todo falla devolvemos un objeto por defecto seguro.
+      console.error('Error obteniendo general info:', err);
+      
+      // Intentar recuperación con query cruda si Prisma falla
       try {
-        const rows: any = await this.prisma.$queryRaw`SELECT * FROM store_general WHERE id = ${1} LIMIT 1`;
+        const rows: any = await this.prisma.$queryRaw`SELECT * FROM store_general WHERE id = 1 LIMIT 1`;
         const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) {
-          return { id: 1, name: 'Tienda', email: '', phone: '', address: '', currency: 'USD' } as any;
+        
+        if (row) {
+          return {
+            ...row,
+            currency: row.currency || 'USD',
+            about: row.about || '',     // <--- IMPORTANTE
+            contact: row.contact || ''  // <--- IMPORTANTE
+          } as any;
         }
-        return { ...row, currency: row.currency || 'USD' } as any;
       } catch (rawErr) {
-        // Si todo falla, devolvemos un objeto mínimo para evitar crash en producción.
-        // Registrar para monitoreo/debug.
-        // eslint-disable-next-line no-console
-        console.warn('StoreService.getGeneral fallback active, error:', err?.message || err, rawErr?.message || rawErr);
-        return { id: 1, name: 'Tienda', email: '', phone: '', address: '', currency: 'USD' } as any;
+        console.error('Error fallback raw:', rawErr);
       }
+
+      // Fallback final de emergencia (ahora incluye about y contact)
+      return { 
+        id: 1, 
+        name: 'Tienda', 
+        email: '', 
+        phone: '', 
+        address: '', 
+        currency: 'USD',
+        about: '',
+        contact: '' 
+      } as any;
     }
   }
 
