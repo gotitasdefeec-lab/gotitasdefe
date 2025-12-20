@@ -15,4 +15,24 @@ export class CategoriesController {
   findAll() {
     return this.categoriesService.findAll();
   }
+@Post()
+  @ApiOperation({ summary: 'Create a category' })
+  create(@Body() data: { name: string }) {
+    return this.categoriesService.create(data);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a category' })
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() data: { name: string }
+  ) {
+    return this.categoriesService.update(id, data);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a category' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.remove(id);
+  }
 }
