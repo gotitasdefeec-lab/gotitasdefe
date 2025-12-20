@@ -4,7 +4,14 @@ import { getStoreGeneral } from '../../services/storeGeneralService';
 export const dynamic = 'force-dynamic';
 
 export default async function AboutPage() {
-  const general = await getStoreGeneral();
+  let general: any = { about: '' };
+  
+  try {
+    general = await getStoreGeneral();
+  } catch (error) {
+    console.error('Error al cargar información general:', error);
+    // Continuar con valores por defecto
+  }
 
   // Formateo automático: convierte saltos dobles en párrafos y líneas con guion en listas
   function formatAboutText(text: string) {
