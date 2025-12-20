@@ -1,7 +1,21 @@
 import { getStoreGeneral } from '../../services/storeGeneralService';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ContactPage() {
-  const general = await getStoreGeneral();
+  let general: any = { contact: '' };
+  
+  try {
+    general = await getStoreGeneral();
+  } catch (error) {
+    console.error('Error al cargar información general:', error);
+  }
+
+  // Sanitizar y formatear el contenido
+  const contactContent = typeof general?.contact === 'string' && general.contact.trim() 
+    ? general.contact 
+    : '<p>No hay información de contacto disponible.</p>';
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center py-8 px-2">
       <div className="w-full max-w-xl bg-white shadow-2xl rounded-3xl p-6 md:p-10 border border-gray-100 flex flex-col items-center">
@@ -11,7 +25,11 @@ export default async function ContactPage() {
           </span>
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 text-center">Contacto</h1>
         </div>
-        <div className="prose prose-lg max-w-none text-gray-800 text-center" style={{ background: 'white' }} dangerouslySetInnerHTML={{ __html: general.contact || 'No hay información de contacto disponible.' }} />
+        <div 
+          className="prose prose-lg max-w-none text-gray-800 text-center" 
+          style={{ background: 'white' }} 
+          dangerouslySetInnerHTML={{ __html: contactContent }} 
+        />
       </div>
     </div>
   );

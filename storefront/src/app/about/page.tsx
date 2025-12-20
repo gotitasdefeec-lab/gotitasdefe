@@ -38,6 +38,10 @@ export default async function AboutPage() {
     return html;
   }
 
+  // Sanitizar y formatear el contenido
+  const aboutText = typeof general?.about === 'string' ? general.about : '';
+  const formattedContent = formatAboutText(aboutText);
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center py-8 px-2">
       <div className="w-full max-w-xl bg-white shadow-2xl rounded-3xl p-6 md:p-10 border border-gray-100 flex flex-col items-center">
@@ -47,7 +51,7 @@ export default async function AboutPage() {
         <div
           className="prose prose-lg max-w-none text-gray-800 text-center"
           style={{ background: 'white' }}
-          dangerouslySetInnerHTML={{ __html: formatAboutText(general.about || '') }}
+          dangerouslySetInnerHTML={{ __html: formattedContent }}
         />
       </div>
     </div>
