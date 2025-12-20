@@ -1324,7 +1324,15 @@ const Sales = () => {
                   if (existsIdx >= 0) {
                     items[existsIdx].quantity += addProductQty;
                   } else {
-                    items.push({ productId: prod.id, name: prod.name, price: prod.price, quantity: addProductQty });
+                    const img = prod.image || (Array.isArray(prod.images) ? prod.images[0] : undefined);
+                    items.push({ 
+                      productId: prod.id, 
+                      name: prod.name, 
+                      price: prod.price, 
+                      quantity: addProductQty,
+                      image: img,
+                      images: prod.images
+                    });
                   }
                   setSelected({ ...selected, items });
                   setAddProductId('');
