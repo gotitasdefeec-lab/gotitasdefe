@@ -15,6 +15,7 @@ interface PayPalButtonProps {
         shippingAddress: string;
         shippingPhone: string;
         notes?: string;
+        paymentMethod?: string;
         items: Array<{
             productId: number;
             quantity: number;

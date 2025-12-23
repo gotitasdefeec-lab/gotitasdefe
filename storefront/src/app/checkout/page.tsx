@@ -308,6 +308,7 @@ export default function CheckoutPage() {
       shippingAddress: `${formData.address}, ${formData.city}`,
       shippingPhone: formData.phone,
       notes: `${formData.notes || ''} ${processingFee > 0 ? `[Incluye recargo de pago: ${formatPrice(processingFee)}]` : ''}`.trim(),
+      paymentMethod: formData.paymentMethod,
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -353,8 +354,13 @@ export default function CheckoutPage() {
         }
       } catch { }
 
-      clearCart();
-      router.push(`/checkout/success?orderId=${orderResponse.id}`);
+      // Redirigir primero, luego limpiar el carrito para evitar redirección prematura al /cart
+      router.replace(`/checkout/success?orderId=${orderResponse.id}`);
+      
+      // Limpiar el carrito después de un pequeño delay para asegurar que la navegación se complete
+      setTimeout(() => {
+        clearCart();
+      }, 100);
 
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || 'Hubo un error al procesar tu pedido.';
@@ -370,8 +376,12 @@ export default function CheckoutPage() {
       localStorage.setItem('last_order_payment_method', 'paypal');
       localStorage.setItem('last_order_id', String(orderId));
     } catch { }
-    clearCart();
-    router.push(`/checkout/success?orderId=${orderId}`);
+    
+    // Redirigir primero, luego limpiar el carrito
+    router.replace(`/checkout/success?orderId=${orderId}`);
+    setTimeout(() => {
+      clearCart();
+    }, 100);
   };
 
   const handlePayPalError = (error: string) => {
@@ -499,6 +509,7 @@ export default function CheckoutPage() {
                             shippingAddress: `${formData.address}, ${formData.city}`,
                             shippingPhone: formData.phone,
                             notes: `${formData.notes || ''} ${processingFee > 0 ? `[Incluye recargo de pago: ${formatPrice(processingFee)}]` : ''}`.trim(),
+                            paymentMethod: 'paypal',
                             items: items.map(item => ({
                               productId: item.product.id,
                               quantity: item.quantity,

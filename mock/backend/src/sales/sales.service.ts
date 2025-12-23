@@ -17,6 +17,22 @@ export class SalesService {
     private paypalService: PaypalService,
   ) { }
 
+  // Helper to determine order status based on payment method
+  private determineOrderStatus(paymentMethod?: string): string {
+    if (!paymentMethod) return 'pending';
+    
+    const lowerMethod = paymentMethod.toLowerCase();
+    const instantPaymentMethods = ['paypal', 'tarjeta', 'credit_card', 'tarjeta_credito', 'tarjeta_debito'];
+    
+    // Marcar como pagado si es un método de pago instantáneo
+    if (instantPaymentMethods.includes(lowerMethod)) {
+      return 'paid';
+    }
+    
+    // Otros métodos (transferencia, depósito, etc.) quedan como pendientes
+    return 'pending';
+  }
+
   private async createSaleTransaction(
     tx: Prisma.TransactionClient,
     items: OrderItemPayload[],
@@ -47,8 +63,11 @@ export class SalesService {
     const shippingCost = Number(data.shippingCost) || 0;
     const secureTotal = secureSubtotal + shippingCost;
 
+    // Determinar el estado basado en el método de pago
+    const orderStatus = this.determineOrderStatus(data.paymentMethod);
+
     const saleData: Prisma.SaleCreateInput = {
-      status: 'pending',
+      status: orderStatus,
       subtotal: secureSubtotal,
       total: secureTotal,
       shippingCost: shippingCost,

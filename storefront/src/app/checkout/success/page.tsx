@@ -192,6 +192,21 @@ function CheckoutSuccessContent() {
               </div>
             )}
 
+            {/* --- SECCIÓN PARA PAGOS CON TARJETA/PAYPAL (NUEVO) --- */}
+            {paymentMethod && (paymentMethod === 'paypal' || paymentMethod === 'tarjeta' || paymentMethod === 'credit_card' || paymentMethod === 'tarjeta_credito' || paymentMethod === 'tarjeta_debito') && (
+              <div className="mb-8">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-green-900 mb-2">✓ Pago Procesado</h3>
+                  <p className="text-sm text-green-800">
+                    Tu pago con {paymentMethod === 'paypal' ? 'PayPal' : 'tarjeta de crédito/débito'} ha sido procesado exitosamente.
+                  </p>
+                  <p className="text-xs text-green-700 mt-2">
+                    * El total incluyó una comisión de procesamiento del 5.4% según lo indicado en el checkout.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* --- SECCIÓN NÚMERO DE ORDEN (CONSERVADA) --- */}
             <div className="mb-8">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

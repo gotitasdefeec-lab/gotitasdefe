@@ -23,6 +23,22 @@ export class PublicController {
     private paypalService: PaypalService,
   ) { }
 
+  // Helper to determine order status based on payment method
+  private determineOrderStatus(paymentMethod?: string): string {
+    if (!paymentMethod) return 'pending';
+    
+    const lowerMethod = paymentMethod.toLowerCase();
+    const instantPaymentMethods = ['paypal', 'tarjeta', 'credit_card', 'tarjeta_credito', 'tarjeta_debito'];
+    
+    // Marcar como pagado si es un método de pago instantáneo
+    if (instantPaymentMethods.includes(lowerMethod)) {
+      return 'paid';
+    }
+    
+    // Otros métodos (transferencia, depósito, etc.) quedan como pendientes
+    return 'pending';
+  }
+
   // Authenticated Checkout
   @Post('checkout')
   @UseGuards(JwtAuthGuard)
@@ -257,7 +273,7 @@ export class PublicController {
         customerName: orderData.customerName,
         cedula: orderData.cedula || '',
         customerEmail: orderData.customerEmail || '',
-        status: 'pending',
+        status: this.determineOrderStatus(orderData.paymentMethod),
         total: orderData.total,
         subtotal: orderData.subtotal,
         taxPercent: orderData.taxPercent || 0,
