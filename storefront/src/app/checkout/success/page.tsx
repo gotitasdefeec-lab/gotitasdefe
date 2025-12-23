@@ -11,35 +11,52 @@ import { storeService } from '@/services/storeService';
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  // --- ESTADOS ---
   const [orderId, setOrderId] = useState<string | null>(null);
+  
+  // Datos de la tienda (NUEVO: Email y Teléfono dinámicos)
   const [storeName, setStoreName] = useState<string>('');
+  const [storeEmail, setStoreEmail] = useState<string>('');
+  const [storePhone, setStorePhone] = useState<string>('');
   const [logoUrl, setLogoUrl] = useState<string>('');
+
+  // Datos del pago (CONSERVADO)
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [paymentInstructions, setPaymentInstructions] = useState<string>('');
   const [paymentBankInfo, setPaymentBankInfo] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  
   const { clearCart } = useCart();
 
+  // 1. Cargar Configuración de la Tienda y Datos de Pago
   useEffect(() => {
     const loadStoreConfig = async () => {
       try {
         const config = await storeService.getStoreConfig();
+        
+        // Asignar datos generales
         setStoreName(config.general?.name || 'Tienda');
-        // Leer método elegido de storage para decidir si mostrar instrucciones/bancarios
+        setStoreEmail(config.general?.email || ''); // <--- NUEVO
+        setStorePhone(config.general?.phone || ''); // <--- NUEVO
+
+        // --- LÓGICA DE PAGO CONSERVADA ---
+        // Leer método elegido de storage
         let chosen: string | null = null;
         try { chosen = localStorage.getItem('last_order_payment_method'); } catch {}
         if (chosen) setPaymentMethod(chosen);
-        // Try to load snapshot saved at checkout time first
+        
+        // Intentar cargar snapshot guardado al momento del checkout (prioridad)
         try {
           const snapInstructions = localStorage.getItem('last_order_payment_instructions');
           const snapBankInfo = localStorage.getItem('last_order_payment_bank_info');
           if (snapInstructions && !paymentInstructions) setPaymentInstructions(snapInstructions);
           if (snapBankInfo && !paymentBankInfo) setPaymentBankInfo(snapBankInfo);
         } catch {}
-        // Buscar instrucciones y bankInfo por método (si el backend las expone)
+
+        // Buscar en config si no se encontró en snapshot
         const pay = config.payment;
         if (pay) {
-          // Soportar dos formatos: array de objetos o array de strings con instructions por key
           if (Array.isArray((pay as any).methods) && (pay as any).methods.length > 0) {
             const first = (pay as any).methods[0];
             if (typeof first === 'object') {
@@ -49,12 +66,10 @@ function CheckoutSuccessContent() {
                 if (m.bankInfo && !paymentBankInfo) setPaymentBankInfo(m.bankInfo);
               }
             } else if (typeof first === 'string' && chosen) {
-              // Mapa de instrucciones opcional
               if ((pay as any).instructions) {
                 const inst = (pay as any).instructions[chosen];
                 if (inst && !paymentInstructions) setPaymentInstructions(inst);
               }
-              // Mapa de datos bancarios opcional si existe para configuración basada en strings
               const bankInfoMap = (pay as any).bankInfo || (pay as any).bank_info || undefined;
               if (bankInfoMap && bankInfoMap[chosen]) {
                 if (!paymentBankInfo) setPaymentBankInfo(bankInfoMap[chosen]);
@@ -63,7 +78,7 @@ function CheckoutSuccessContent() {
           }
         }
         
-        // Load logo from public endpoint
+        // Cargar logo
         try {
           const { publicApi } = await import('@/services/api');
           const logoResponse = await publicApi.get('/public/store/logo');
@@ -76,12 +91,12 @@ function CheckoutSuccessContent() {
     loadStoreConfig();
   }, []);
 
+  // 2. Obtener ID de la Orden (CONSERVADO)
   useEffect(() => {
     const orderIdParam = searchParams.get('orderId');
     if (orderIdParam) {
       setOrderId(orderIdParam);
     } else {
-      // Fallback to localStorage in case query param was lost
       try {
         const stored = localStorage.getItem('last_order_id');
         if (stored) {
@@ -95,7 +110,7 @@ function CheckoutSuccessContent() {
     }
   }, [searchParams, router]);
 
-  // Clear cart once when success page is confirmed
+  // 3. Limpiar carrito (CONSERVADO)
   useEffect(() => {
     if (!orderId) return;
     let done = false;
@@ -113,16 +128,21 @@ function CheckoutSuccessContent() {
     );
   }
 
+  // Helper para WhatsApp
+  const getWhatsAppLink = (phone: string) => {
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    return `https://wa.me/${cleanPhone}`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Checkout header with logo and trust badges */}
       <div className="sticky top-0 z-40">
         <CheckoutHeader storeName={storeName || "Tienda"} logoUrl={logoUrl} />
       </div>
       <div className="py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Success Header */}
+          {/* Header de Éxito */}
           <div className="bg-green-50 px-6 py-8 text-center">
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
               <CheckCircleIcon className="h-10 w-10 text-green-600" />
@@ -133,9 +153,9 @@ function CheckoutSuccessContent() {
             </p>
           </div>
 
-          {/* Order Details */}
           <div className="px-6 py-8">
-            {/* Payment instructions for bank transfer/deposit */}
+            
+            {/* --- SECCIÓN DE DATOS BANCARIOS (CONSERVADA) --- */}
             {paymentMethod && (paymentMethod === 'transferencia' || paymentMethod === 'deposito') && (
               <div className="mb-8">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -147,6 +167,7 @@ function CheckoutSuccessContent() {
                     <div className="text-sm text-blue-900 whitespace-pre-line">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-medium">Datos bancarios</h4>
+                        {/* Botón de copiar funcional */}
                         <button
                           type="button"
                           onClick={async () => {
@@ -161,7 +182,7 @@ function CheckoutSuccessContent() {
                           {copied ? 'Copiado' : 'Copiar'}
                         </button>
                       </div>
-                      <pre className="text-sm leading-relaxed bg-white rounded-md p-3 border border-blue-100 overflow-x-auto">{paymentBankInfo}</pre>
+                      <pre className="text-sm leading-relaxed bg-white rounded-md p-3 border border-blue-100 overflow-x-auto font-sans">{paymentBankInfo}</pre>
                     </div>
                   )}
                   {!paymentBankInfo && !paymentInstructions && (
@@ -170,6 +191,8 @@ function CheckoutSuccessContent() {
                 </div>
               </div>
             )}
+
+            {/* --- SECCIÓN NÚMERO DE ORDEN (CONSERVADA) --- */}
             <div className="mb-8">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center justify-center space-x-2 mb-2">
@@ -182,7 +205,7 @@ function CheckoutSuccessContent() {
               </div>
             </div>
 
-            {/* What happens next */}
+            {/* Pasos siguientes */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">¿Qué sigue ahora?</h3>
               <div className="space-y-4">
@@ -197,53 +220,54 @@ function CheckoutSuccessContent() {
                     </p>
                   </div>
                 </div>
-                
+                {/* Más pasos... */}
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-semibold text-blue-600">2</span>
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">Preparación del pedido</h4>
-                    <p className="text-sm text-gray-600">
-                      Nuestro equipo preparará cuidadosamente tu pedido
-                    </p>
+                    <p className="text-sm text-gray-600">Nuestro equipo preparará cuidadosamente tu pedido</p>
                   </div>
                 </div>
-                
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-semibold text-blue-600">3</span>
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">Envío y entrega</h4>
-                    <p className="text-sm text-gray-600">
-                      Te notificaremos cuando tu pedido esté en camino
-                    </p>
+                    <p className="text-sm text-gray-600">Te notificaremos cuando tu pedido esté en camino</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contact Info */}
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">¿Necesitas ayuda?</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">WhatsApp:</span>
-                  <a href="https://wa.me/593991234567" className="ml-2 text-blue-600 hover:text-blue-800">
-                    +593 99 123 4567
-                  </a>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Email:</span>
-                  <a href="mailto:contacto@mitienda.com" className="ml-2 text-blue-600 hover:text-blue-800">
-                    contacto@mitienda.com
-                  </a>
+            {/* --- SECCIÓN CONTACTO (ACTUALIZADA CON DATOS REALES) --- */}
+            {(storePhone || storeEmail) && (
+              <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">¿Necesitas ayuda?</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {storePhone && (
+                    <div>
+                      <span className="font-medium text-gray-700">WhatsApp:</span>
+                      <a href={getWhatsAppLink(storePhone)} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:text-blue-800">
+                        {storePhone}
+                      </a>
+                    </div>
+                  )}
+                  {storeEmail && (
+                    <div>
+                      <span className="font-medium text-gray-700">Email:</span>
+                      <a href={`mailto:${storeEmail}`} className="ml-2 text-blue-600 hover:text-blue-800">
+                        {storeEmail}
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Action Buttons */}
+            {/* Botones de acción */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/"
@@ -262,7 +286,7 @@ function CheckoutSuccessContent() {
               </Link>
             </div>
 
-            {/* Order tracking info */}
+            {/* Consejo final */}
             <div className="mt-8 pt-8 border-t border-gray-200">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h4 className="font-medium text-yellow-800 mb-2">
