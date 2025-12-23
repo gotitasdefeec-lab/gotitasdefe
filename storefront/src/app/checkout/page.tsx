@@ -86,7 +86,21 @@ export default function CheckoutPage() {
   const baseShipping = useMemo(() => (selectedMethod ? selectedMethod.cost : 5.99), [selectedMethod]);
   const shipping = useMemo(() => (subtotal >= freeShippingThreshold ? 0 : baseShipping), [subtotal, freeShippingThreshold, baseShipping]);
   const tax = useMemo(() => (taxEnabled ? subtotal * taxRate : 0), [taxEnabled, subtotal, taxRate]);
-  const total = useMemo(() => subtotal + shipping + tax, [subtotal, shipping, tax]);
+  
+  // Cálculo de la comisión del 5.4% para tarjeta de crédito/débito y PayPal
+  const processingFee = useMemo(() => {
+    // Definir qué métodos cobran comisión
+    const methodsWithFee = ['paypal', 'tarjeta', 'credit_card', 'tarjeta_credito', 'tarjeta_debito'];
+    
+    if (formData.paymentMethod && methodsWithFee.includes(formData.paymentMethod.toLowerCase())) {
+      // Calculamos el 5.4% sobre la suma de subtotal + envío + impuestos
+      const baseAmount = subtotal + shipping + tax;
+      return baseAmount * 0.054;
+    }
+    return 0;
+  }, [formData.paymentMethod, subtotal, shipping, tax]);
+  
+  const total = useMemo(() => subtotal + shipping + tax + processingFee, [subtotal, shipping, tax, processingFee]);
 
   const ShippingMethodSelector = useMemo(
     () =>
@@ -293,7 +307,7 @@ export default function CheckoutPage() {
       cedula: formData.cedula,
       shippingAddress: `${formData.address}, ${formData.city}`,
       shippingPhone: formData.phone,
-      notes: formData.notes,
+      notes: `${formData.notes || ''} ${processingFee > 0 ? `[Incluye recargo de pago: ${formatPrice(processingFee)}]` : ''}`.trim(),
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -484,7 +498,7 @@ export default function CheckoutPage() {
                             cedula: formData.cedula,
                             shippingAddress: `${formData.address}, ${formData.city}`,
                             shippingPhone: formData.phone,
-                            notes: formData.notes,
+                            notes: `${formData.notes || ''} ${processingFee > 0 ? `[Incluye recargo de pago: ${formatPrice(processingFee)}]` : ''}`.trim(),
                             items: items.map(item => ({
                               productId: item.product.id,
                               quantity: item.quantity,
@@ -541,6 +555,14 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal</span><span className="text-gray-900 font-medium">{formatPrice(subtotal)}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-600">Envío</span><span className="text-gray-900 font-medium">{shipping === 0 ? <span className="text-green-600">¡Gratis!</span> : formatPrice(shipping)}</span></div>
                   {taxEnabled && <div className="flex justify-between text-sm"><span className="text-gray-600">Impuestos ({(taxRate * 100).toFixed(0)}%)</span><span className="text-gray-900 font-medium">{formatPrice(tax)}</span></div>}
+                  
+                  {processingFee > 0 && (
+                    <div className="flex justify-between text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                      <span>Comisión Tarjeta/PayPal (5.4%)</span>
+                      <span className="font-medium">{formatPrice(processingFee)}</span>
+                    </div>
+                  )}
+                  
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-lg font-semibold"><span className="text-gray-900">Total</span><span className="text-gray-900">{formatPrice(total)}</span></div>
                   </div>
