@@ -2,10 +2,23 @@ import { MetadataRoute } from 'next';
 import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 
+// Función para limpiar el nombre (ej: "Camiseta Premium" -> "camiseta-premium")
+const slugify = (text: string) => {
+    return text
+        .toString()
+        .normalize('NFD')               // Separa tildes
+        .replace(/[\u0300-\u036f]/g, '') // Elimina tildes
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')           // Espacios a guiones
+        .replace(/[^\w\-]+/g, '')       // Borra caracteres raros
+        .replace(/\-\-+/g, '-');        // Borra guiones dobles
+};
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://gotasdefe.com';
 
-    // Static routes
+    // Rutas estáticas
     const routes = [
         '',
         '/about',
@@ -35,7 +48,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         products = await productsPromise as any[];
     } catch (e: any) {
         console.warn('Sitemap: Could not fetch products, continuing with static routes only', e?.message || e);
-        // Continue without products - sitemap will still work with static routes
     }
 
     try {
@@ -49,11 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         categories = await categoriesPromise as any[];
     } catch (e: any) {
         console.warn('Sitemap: Could not fetch categories, continuing with static routes only', e?.message || e);
-        // Continue without categories - sitemap will still work with static routes
     }
 
+    // --- CAMBIO APLICADO AQUÍ ---
+    // Genera URLs tipo: .../products/6-camiseta-premium
     const productRoutes = Array.isArray(products) ? products.map((product) => ({
-        url: `${baseUrl}/products/${product.id}`,
+        url: `${baseUrl}/products/${product.id}-${slugify(product.name)}`,
         lastModified: new Date(product.updatedAt || new Date()),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
