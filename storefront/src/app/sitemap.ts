@@ -16,7 +16,7 @@ const slugify = (text: string) => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://gotasdefe.com';
+    const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://www.gotasdefe.com';
 
     // Rutas estáticas
     const routes = [
