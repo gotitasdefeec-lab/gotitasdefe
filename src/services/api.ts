@@ -9,7 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': '1',
   },
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Interceptor para manejar tokens de autenticación
