@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { productsApi, inventoryApi, salesApi } from '../services/api';
-import { pushNotificationService } from '../services/pushNotificationService';
 
 /**
  * Hook para generar notificaciones automáticas basadas en eventos del sistema
