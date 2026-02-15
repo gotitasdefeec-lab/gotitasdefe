@@ -50,7 +50,7 @@ export const productsApi = {
   getAll: () => api.get('/products'),
   getById: (id: string | number) => api.get(`/products/${id}`),
   create: (data: any) => api.post('/products', data),
-  update: (id: string | number, data: any) => api.patch(`/products/${id}`, data), // Cambiado PUT a PATCH por seguridad
+  update: (id: string | number, data: any) => api.put(`/products/${id}`, data), // Cambiado PUT a PATCH por seguridad
   delete: (id: string | number) => api.delete(`/products/${id}`),
 };
 
