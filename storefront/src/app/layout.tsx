@@ -43,7 +43,7 @@ async function getPolicies() {
 export async function generateMetadata(): Promise<Metadata> {
   const storeConfig = await getStoreConfig();
   const general = storeConfig?.general || {};
-  const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://gotasdefe.com';
+  const baseUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://www.gotasdefe.com';
 
   return {
     metadataBase: new URL(baseUrl),

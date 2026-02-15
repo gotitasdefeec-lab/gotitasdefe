@@ -53,9 +53,9 @@ export default function ProductGrid({ products }: { products: Product[] }) {
         {/* Encabezado de sección */}
         <div className="flex items-center justify-between mb-10 md:mb-12">
           <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 mb-2">
-              Productos destacados
-            </h2>
+            <h2 className="text-xl md:text-3xl lg:text-4xl font-light tracking-wide text-gray-900 mb-2">
+  Productos destacados
+</h2>
             <div className="w-16 h-0.5 bg-blue-600"></div>
           </div>
           <Link 
