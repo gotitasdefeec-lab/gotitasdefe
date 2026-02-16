@@ -43,32 +43,67 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         try {
           const parsedCart = JSON.parse(savedCart);
           if (Array.isArray(parsedCart)) {
-            // Initial set from local storage
-            if (mounted) setItems(parsedCart);
+            // Check if we have minimal cart items (productId + quantity only)
+            const isMinimalFormat = parsedCart.length > 0 && 
+              parsedCart[0].productId !== undefined && 
+              parsedCart[0].product === undefined;
 
-            // Fetch fresh data for each product
-            const updatedItems = await Promise.all(
-              parsedCart.map(async (item: CartItem) => {
-                try {
-                  const freshProduct = await productService.getProduct(item.product.id);
-                  if (freshProduct) {
-                    return {
-                      ...item,
-                      product: {
-                        ...freshProduct,
-                        price: Number(freshProduct.price)
-                      }
-                    };
+            if (isMinimalFormat) {
+              // Hydrate minimal cart items with full product data
+              const hydrated = await Promise.all(
+                parsedCart.map(async (item: { productId: number; quantity: number; id: number }) => {
+                  try {
+                    const freshProduct = await productService.getProduct(item.productId);
+                    if (freshProduct) {
+                      return {
+                        id: item.id,
+                        product: {
+                          ...freshProduct,
+                          price: Number(freshProduct.price)
+                        },
+                        quantity: item.quantity
+                      };
+                    }
+                    return null;
+                  } catch (e) {
+                    console.error('Error fetching product:', e);
+                    return null;
                   }
-                  return item;
-                } catch (e) {
-                  return item;
-                }
-              })
-            );
+                })
+              );
 
-            if (mounted) {
-              setItems(updatedItems);
+              const validItems = hydrated.filter(item => item !== null) as CartItem[];
+              if (mounted) {
+                setItems(validItems);
+              }
+            } else {
+              // Legacy format: full product objects stored
+              if (mounted) setItems(parsedCart);
+
+              // Fetch fresh data for each product
+              const updatedItems = await Promise.all(
+                parsedCart.map(async (item: CartItem) => {
+                  try {
+                    const freshProduct = await productService.getProduct(item.product.id);
+                    if (freshProduct) {
+                      return {
+                        ...item,
+                        product: {
+                          ...freshProduct,
+                          price: Number(freshProduct.price)
+                        }
+                      };
+                    }
+                    return item;
+                  } catch (e) {
+                    return item;
+                  }
+                })
+              );
+
+              if (mounted) {
+                setItems(updatedItems);
+              }
             }
           } else {
             localStorage.removeItem('cart');
@@ -89,9 +124,50 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, []);
 
   // Save cart to localStorage whenever items change, but only after initial load
+  // Store minimal data to avoid QuotaExceededError
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('cart', JSON.stringify(items));
+      try {
+        // Store only essential data: product ID and quantity
+        const minimalCart = items.map(item => ({
+          id: item.id,
+          productId: item.product.id,
+          quantity: item.quantity
+        }));
+        
+        localStorage.setItem('cart', JSON.stringify(minimalCart));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+          console.error('localStorage quota exceeded. Attempting to clear old data...');
+          
+          // Try to clear non-essential items from localStorage
+          try {
+            // Remove temporary/cache items if any
+            const keysToTry = ['notifiedLowStockIds', 'notifiedSalesIds'];
+            keysToTry.forEach(key => {
+              try {
+                localStorage.removeItem(key);
+              } catch (e) {
+                // ignore
+              }
+            });
+
+            // Retry saving the cart
+            const minimalCart = items.map(item => ({
+              id: item.id,
+              productId: item.product.id,
+              quantity: item.quantity
+            }));
+            
+            localStorage.setItem('cart', JSON.stringify(minimalCart));
+          } catch (retryError) {
+            console.error('Failed to save cart after cleanup:', retryError);
+            alert('No se pudo guardar el carrito. El almacenamiento local está lleno. Por favor, borra algunos datos o usa el modo incógnito.');
+          }
+        } else {
+          console.error('Error saving cart to localStorage:', error);
+        }
+      }
     }
   }, [items, isLoaded]);
 
