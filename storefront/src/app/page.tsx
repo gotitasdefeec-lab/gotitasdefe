@@ -3,9 +3,8 @@ import HeroCarousel from '@/components/HeroCarousel';
 import ProductGrid from '@/components/ProductGrid';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Enable incremental static regeneration for better performance
+export const revalidate = 60; // Revalidate every 60 seconds
 
 const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
 
@@ -14,7 +13,7 @@ async function getFeaturedProducts() {
     const url = `${BASE}/public/products/featured`;
     console.log('Fetching from:', url);
     const res = await fetch(url, { 
-      cache: 'no-store' // Disable cache to always get fresh data
+      next: { revalidate: 60 } // Cache for 60 seconds
     });
     if (!res.ok) {
       console.error('Failed to fetch featured products:', res.status);
@@ -33,7 +32,7 @@ async function getFeaturedProducts() {
 async function getCarouselSlides() {
   try {
     const res = await fetch(`${BASE}/public/carousel`, { 
-      cache: 'no-store' // Deshabilitar cache para siempre obtener las últimas imágenes
+      next: { revalidate: 60 } // Cache for 60 seconds to optimize bandwidth
     });
     if (!res.ok) {
       console.error('Error fetching carousel:', res.status, res.statusText);
