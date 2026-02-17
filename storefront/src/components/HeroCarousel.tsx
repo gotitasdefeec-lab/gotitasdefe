@@ -143,6 +143,7 @@ export default function HeroCarousel({ initialSlides }: { initialSlides?: Carous
                   priority={index === 0}
                   quality={80}
                   className="object-contain bg-white"
+                  unoptimized
                 />
               )}
               
