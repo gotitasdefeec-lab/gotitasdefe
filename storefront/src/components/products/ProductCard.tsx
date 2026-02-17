@@ -64,7 +64,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
             width={300}
             height={300}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            unoptimized
           />
           
           {/* Overlay sutil */}
