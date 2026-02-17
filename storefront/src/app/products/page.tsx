@@ -1,9 +1,8 @@
 import React from 'react';
 import SimpleProductGrid from '@/components/products/SimpleProductGrid';
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Enable incremental static regeneration for better performance
+export const revalidate = 60; // Revalidate every 60 seconds
 
 const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
 
@@ -12,7 +11,7 @@ async function getProducts(categoryName?: string | null) {
     const url = categoryName
       ? `${BASE}/public/categories/${encodeURIComponent(categoryName!)}/products`
       : `${BASE}/public/products`;
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) return [] as any[];
     const data = await res.json();
     return Array.isArray(data) ? data : data?.data || [];
