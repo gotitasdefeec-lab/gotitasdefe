@@ -1,0 +1,6 @@
+tunnel: gotasdefebackend
+
+ingress:
+  - hostname: api.gotasdefe.com
+    service: http://localhost:4001
+  - service: http_status:404

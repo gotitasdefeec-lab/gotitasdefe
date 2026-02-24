@@ -1,0 +1,23 @@
+// Copia del schema.prisma original para que Prisma pueda generar el cliente correctamente
+// Puedes reemplazar este archivo si ya tienes uno actualizado
+
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Policy {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("policies")
+}
