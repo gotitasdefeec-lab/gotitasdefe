@@ -22,9 +22,9 @@ export class CarouselService {
   }
 
   async create(data: any) {
-    // ✨ Optimizar imagen del carrusel automáticamente
+    // ✨ Optimizar imagen del carrusel automáticamente y guardar como archivo
     if (data.imageUrl) {
-      data.imageUrl = await this.imageOptimization.optimizeImage(data.imageUrl);
+      data.imageUrl = await this.imageOptimization.optimizeImage(data.imageUrl, { type: 'carousel' });
     }
     
     return this.prisma.carousel.create({ data });
@@ -33,7 +33,14 @@ export class CarouselService {
   async update(id: number, data: any) {
     // ✨ Optimizar imagen del carrusel si se actualizó
     if (data.imageUrl) {
-      data.imageUrl = await this.imageOptimization.optimizeImage(data.imageUrl);
+      // Buscar imagen antigua para eliminarla
+      const existing = await this.prisma.carousel.findUnique({ where: { id } });
+      if (existing && existing.imageUrl) {
+        await this.imageOptimization.deleteImage(existing.imageUrl);
+      }
+      
+      // Optimizar y guardar nueva imagen
+      data.imageUrl = await this.imageOptimization.optimizeImage(data.imageUrl, { type: 'carousel' });
     }
     
     return this.prisma.carousel.update({
@@ -44,6 +51,12 @@ export class CarouselService {
 
   async remove(id: number) {
     try {
+      // Buscar imagen para eliminarla
+      const carousel = await this.prisma.carousel.findUnique({ where: { id } });
+      if (carousel && carousel.imageUrl) {
+        await this.imageOptimization.deleteImage(carousel.imageUrl);
+      }
+      
       return await this.prisma.carousel.delete({
         where: { id },
       });

@@ -31,9 +31,9 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto) {
     const { images, ...rest } = createProductDto;
     
-    // ✨ Optimizar imágenes automáticamente (19MB → 300KB)
+    // ✨ Optimizar imágenes automáticamente (19MB → 300KB) y guardar como archivos
     const optimizedImages = Array.isArray(images) && images.length > 0
-      ? await this.imageOptimization.optimizeImages(images)
+      ? await this.imageOptimization.optimizeImages(images, { type: 'product' })
       : [];
     
     const product = await this.prisma.product.create({
@@ -60,14 +60,20 @@ export class ProductsService {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    await this.findOne(id); // Validate exists
+    const existingProduct = await this.findOne(id); // Validate exists
 
     const { images, ...rest } = updateProductDto;
     
     // ✨ Optimizar nuevas imágenes si se actualizaron
     let processedImages = images;
     if (images !== undefined && Array.isArray(images) && images.length > 0) {
-      processedImages = await this.imageOptimization.optimizeImages(images);
+      // Eliminar imágenes antiguas si hay nuevas
+      if (existingProduct.images && Array.isArray(existingProduct.images)) {
+        await this.imageOptimization.deleteImages(existingProduct.images as string[]);
+      }
+      
+      // Optimizar y guardar nuevas imágenes
+      processedImages = await this.imageOptimization.optimizeImages(images, { type: 'product' });
     }
     
     const product = await this.prisma.product.update({
@@ -90,7 +96,12 @@ export class ProductsService {
   }
 
   async remove(id: number) {
-    await this.findOne(id); // Validate exists
+    const product = await this.findOne(id); // Validate exists
+    
+    // Eliminar imágenes físicas antes de borrar el producto
+    if (product.images && Array.isArray(product.images)) {
+      await this.imageOptimization.deleteImages(product.images as string[]);
+    }
     
     return this.prisma.product.delete({
       where: { id },
