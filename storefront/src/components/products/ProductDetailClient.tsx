@@ -21,7 +21,10 @@ const getImageUrl = (imagePath?: string | null) => {
   if (path.startsWith('data:image') || path.startsWith('http')) return path;
   // For relative paths like /uploads/..., prepend API URL
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.gotasdefe.com';
-  return `${API_URL}${path}`;
+  // Normalizar barras para evitar // en la URL
+  const cleanUrl = API_URL.replace(/\/$/, '');
+  const cleanPath = path.replace(/^\//, '');
+  return `${cleanUrl}/${cleanPath}`;
 };
 
 export default function ProductDetailClient({ product, relatedProducts }: { product: Product; relatedProducts: Product[] }) {

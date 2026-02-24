@@ -25,7 +25,10 @@ const getImageUrl = (imagePath?: string | null) => {
     }
     return path;
   }
-  return `${API_URL}${path}`;
+  // Normalizar barras para evitar // en la URL
+  const cleanUrl = API_URL.replace(/\/$/, '');
+  const cleanPath = path.replace(/^\//, '');
+  return `${cleanUrl}/${cleanPath}`;
 };
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
