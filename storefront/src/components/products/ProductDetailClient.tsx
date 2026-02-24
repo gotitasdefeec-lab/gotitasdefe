@@ -13,6 +13,17 @@ import { ChevronLeftIcon, MinusIcon, PlusIcon, ShoppingCartIcon } from '@heroico
 
 const Lightbox = dynamic(() => import('@/components/Lightbox'), { ssr: false });
 
+// Helper to build valid image URLs (base64, absolute, or relative paths from backend)
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath) return '/placeholder-product.svg';
+  if (typeof imagePath !== 'string') return '/placeholder-product.svg';
+  const path = imagePath.trim();
+  if (path.startsWith('data:image') || path.startsWith('http')) return path;
+  // For relative paths like /uploads/..., prepend API URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.gotasdefe.com';
+  return `${API_URL}${path}`;
+};
+
 export default function ProductDetailClient({ product, relatedProducts }: { product: Product; relatedProducts: Product[] }) {
   const router = useRouter();
   const { addItem } = useCart();
@@ -64,7 +75,7 @@ export default function ProductDetailClient({ product, relatedProducts }: { prod
             <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden relative cursor-zoom-in group" onClick={() => setLightboxOpen(true)}>
               <Image
                 key={selectedImageIndex}
-                src={productImages[selectedImageIndex]}
+                src={getImageUrl(productImages[selectedImageIndex])}
                 alt={product.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -85,13 +96,13 @@ export default function ProductDetailClient({ product, relatedProducts }: { prod
                       selectedImageIndex === index ? 'border-gray-900 ring-1 ring-gray-900' : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <Image src={image} alt={`${product.name} ${index + 1}`} width={80} height={80} className="object-cover" />
+                    <Image src={getImageUrl(image)} alt={`${product.name} ${index + 1}`} width={80} height={80} className="object-cover" />
                   </button>
                 ))}
               </div>
             )}
             {lightboxOpen && (
-              <Lightbox images={productImages} initialIndex={selectedImageIndex} onClose={() => setLightboxOpen(false)} />
+              <Lightbox images={productImages.map(img => getImageUrl(img))} initialIndex={selectedImageIndex} onClose={() => setLightboxOpen(false)} />
             )}
           </div>
 
