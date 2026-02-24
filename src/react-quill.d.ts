@@ -1,4 +1,4 @@
-declare module 'react-quill' {
+declare module 'react-quill-new' {
   import { Component } from 'react';
 
   export interface ReactQuillProps {

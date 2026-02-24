@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
-// Importación dinámica de React Quill para evitar errores de SSR
+// Importación dinámica de React Quill (versión compatible con React 19)
 let ReactQuill: any = null;
 if (typeof window !== 'undefined') {
-  ReactQuill = require('react-quill');
-  require('react-quill/dist/quill.snow.css');
+  ReactQuill = require('react-quill-new');
+  require('react-quill-new/dist/quill.snow.css');
 }
 
 interface RichTextEditorProps {
