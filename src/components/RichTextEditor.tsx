@@ -1,7 +1,12 @@
-import React, { useMemo } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
+
+// Importación dinámica de React Quill para evitar errores de SSR
+let ReactQuill: any = null;
+if (typeof window !== 'undefined') {
+  ReactQuill = require('react-quill');
+  require('react-quill/dist/quill.snow.css');
+}
 
 interface RichTextEditorProps {
   value: string;
@@ -18,6 +23,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   label,
   minHeight = 200,
 }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Configuración de las herramientas del editor
   const modules = useMemo(
     () => ({
@@ -49,6 +60,35 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     'color',
     'background',
   ];
+
+  // No renderizar hasta que el componente esté montado en el cliente
+  if (!mounted || !ReactQuill) {
+    return (
+      <Box>
+        {label && (
+          <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+            {label}
+          </Typography>
+        )}
+        <Box
+          sx={{
+            border: '1px solid #ccc',
+            borderRadius: 1,
+            overflow: 'hidden',
+            backgroundColor: '#f9f9f9',
+            minHeight: `${minHeight + 42}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Cargando editor...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box>
