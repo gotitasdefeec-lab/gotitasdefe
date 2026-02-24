@@ -3,7 +3,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import ProductGrid from '@/components/ProductGrid';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-// Cache de 24 horas para ahorrar bandwidth. On-Demand Revalidation actualiza instantáneamente cuando cambias algo en el admin
+// ✨ ISR con cache de 24h + On-Demand Revalidation (backend optimizado: 95MB → 0.52KB)
 export const revalidate = 86400; // 24 horas = máximo ahorro en Vercel
 
 const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
