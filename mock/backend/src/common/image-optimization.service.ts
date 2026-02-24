@@ -73,24 +73,15 @@ export class ImageOptimizationService {
   }
 
   /**
-   * Detecta si una imagen base64 ya está optimizada
+   * Detecta si una imagen ya está optimizada (es URL física)
+   * IMPORTANTE: Siempre forzar conversión de base64 a archivo, sin importar el tamaño
    */
   private isAlreadyOptimized(base64: string): boolean {
-    // Si ya es URL, está optimizada
+    // Solo está optimizada si ya es una URL física
     if (this.isUrl(base64)) {
       return true;
     }
-
-    // Si ya es WebP pequeño, probablemente ya está optimizada
-    if (base64.startsWith('data:image/webp')) {
-      const sizeInBytes = (base64.length * 3) / 4;
-      const sizeInMB = sizeInBytes / (1024 * 1024);
-      if (sizeInMB < 0.5) {
-        this.logger.log(`Imagen WebP pequeña (~${sizeInMB.toFixed(2)}MB), omitiendo`);
-        return true;
-      }
-    }
-
+    // CUALQUIER base64 debe convertirse a archivo físico
     return false;
   }
 

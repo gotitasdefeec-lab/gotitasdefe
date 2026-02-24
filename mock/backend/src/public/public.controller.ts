@@ -87,12 +87,9 @@ export class PublicController {
   @Get('products/featured')
   @ApiOperation({ summary: 'Get featured products (public)' })
   async getFeaturedProducts() {
-    const products = await this.productsService.findAll();
-    // For now, just return active products. You can add a 'featured' field to the schema later
-    return products
-      .filter(product => product.status === 'active')
-      .slice(0, 8)
-      .map(product => this.mapProductForStorefront(product));
+    // Usar método optimizado que trae solo campos necesarios
+    const products = await this.productsService.findFeatured(8);
+    return products.map(product => this.mapProductForStorefront(product));
   }
 
   @Get('products/:id')

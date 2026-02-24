@@ -4,6 +4,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as crypto from 'crypto';
+import * as dotenv from 'dotenv';
+
+// Cargar variables de entorno
+dotenv.config();
 
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);

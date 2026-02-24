@@ -16,6 +16,31 @@ export class ProductsService {
     });
   }
 
+  /**
+   * Buscar productos destacados (optimizado para homepage)
+   * Solo trae campos necesarios para reducir tamaño del response
+   */
+  async findFeatured(limit: number = 8) {
+    return this.prisma.product.findMany({
+      where: { 
+        status: 'active',
+        // featured: true, // Descomentar cuando agregues campo 'featured' al schema
+      },
+      take: limit,
+      orderBy: { id: 'desc' }, // Más recientes primero
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        stock: true,
+        images: true, // URLs optimizadas: ["/uploads/products/img.webp"]
+        category: true,
+        sku: true,
+        // NO incluir 'description' para reducir payload
+      },
+    });
+  }
+
   async findOne(id: number) {
     const product = await this.prisma.product.findUnique({
       where: { id },
