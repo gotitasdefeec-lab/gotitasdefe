@@ -4,7 +4,8 @@ import { Box, Typography } from '@mui/material';
 // Importación dinámica de React Quill (versión compatible con React 19)
 let ReactQuill: any = null;
 if (typeof window !== 'undefined') {
-  ReactQuill = require('react-quill-new');
+  const ReactQuillModule = require('react-quill-new');
+  ReactQuill = ReactQuillModule.default ?? ReactQuillModule;
   require('react-quill-new/dist/quill.snow.css');
 }
 
@@ -56,7 +57,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     'underline',
     'strike',
     'list',
-    'bullet',
     'indent',
     'align',
     'link',
