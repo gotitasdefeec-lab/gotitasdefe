@@ -12,6 +12,17 @@ const nextConfig = {
   // Evita advertencia de raíz inferida en monorepo
   outputFileTracingRoot: path.join(__dirname, '..'),
 
+  // Configuración de Next.js Image Optimization para dominios remotos
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.gotasdefe.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
 
   async rewrites() {
     return [
