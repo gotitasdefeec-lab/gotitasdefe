@@ -527,7 +527,7 @@ const Products = () => {
                               setSnackbar({ 
                                 open: true, 
                                 message: `⚠️ Imágenes grandes detectadas (${totalSizeMB.toFixed(1)}MB total). Se optimizarán automáticamente en el servidor.`, 
-                                severity: 'info' 
+                                severity: 'success' 
                               });
                             }
 
@@ -535,7 +535,7 @@ const Products = () => {
                             setSnackbar({ 
                               open: true, 
                               message: `Comprimiendo ${files.length} imagen(es)...`, 
-                              severity: 'info' 
+                              severity: 'success' 
                             });
 
                             // Comprimir imágenes automáticamente (19MB → ~200KB)
