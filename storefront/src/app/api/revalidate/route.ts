@@ -18,6 +18,24 @@ import { NextRequest, NextResponse } from 'next/server';
  * - "/products/[id]" (producto específico)
  * - "/policies" (políticas)
  */
+
+// Helper para agregar headers CORS
+function getCorsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*', // Permite cualquier origen (o especifica: https://gotitasdefe.vercel.app)
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
+
+// Manejar preflight request (OPTIONS)
+export async function OPTIONS() {
+  return NextResponse.json({}, { 
+    status: 200,
+    headers: getCorsHeaders()
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -29,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (secret !== REVALIDATE_SECRET) {
       return NextResponse.json(
         { message: 'Invalid secret token' },
-        { status: 401 }
+        { status: 401, headers: getCorsHeaders() }
       );
     }
 
@@ -92,7 +110,7 @@ export async function POST(request: NextRequest) {
         productId: productId || null,
         timestamp: new Date().toISOString()
       }
-    });
+    }, { headers: getCorsHeaders() });
 
   } catch (error) {
     console.error('❌ Revalidation error:', error);
@@ -102,7 +120,7 @@ export async function POST(request: NextRequest) {
         message: 'Error during revalidation',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
-      { status: 500 }
+      { status: 500, headers: getCorsHeaders() }
     );
   }
 }
@@ -134,5 +152,5 @@ export async function GET() {
       'home': 'Revalidates /',
       'all-products': 'Revalidates /products'
     }
-  });
+  }, { headers: getCorsHeaders() });
 }
