@@ -84,6 +84,13 @@ export default function ProductDetailClient({ product, relatedProducts }: { prod
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 priority
+                unoptimized
+                onError={(event) => {
+                  const img = event.currentTarget as HTMLImageElement;
+                  if (!img.src.includes('/placeholder-product.svg')) {
+                    img.src = '/placeholder-product.svg';
+                  }
+                }}
               />
               <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
               <span className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-gray-900 text-xs px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-light">Ver imagen completa</span>
@@ -99,7 +106,20 @@ export default function ProductDetailClient({ product, relatedProducts }: { prod
                       selectedImageIndex === index ? 'border-gray-900 ring-1 ring-gray-900' : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <Image src={getImageUrl(image)} alt={`${product.name} ${index + 1}`} width={80} height={80} className="object-cover" />
+                    <Image
+                      src={getImageUrl(image)}
+                      alt={`${product.name} ${index + 1}`}
+                      width={80}
+                      height={80}
+                      className="object-cover"
+                      unoptimized
+                      onError={(event) => {
+                        const img = event.currentTarget as HTMLImageElement;
+                        if (!img.src.includes('/placeholder-product.svg')) {
+                          img.src = '/placeholder-product.svg';
+                        }
+                      }}
+                    />
                   </button>
                 ))}
               </div>

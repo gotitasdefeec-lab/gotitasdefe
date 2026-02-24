@@ -5,6 +5,7 @@ import { useCustomer } from '@/context/CustomerContext';
 import Link from 'next/link';
 import { ShoppingBagIcon, CubeIcon, TruckIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { API_URL } from '@/services/api';
 
 // Helper to get status color and icon
 const getStatusDetails = (status: string) => {
@@ -20,6 +21,13 @@ const getStatusDetails = (status: string) => {
     default:
       return { icon: CubeIcon, color: 'text-gray-500', label: status };
   }
+};
+
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath || typeof imagePath !== 'string') return '/placeholder-product.svg';
+  const path = imagePath.trim();
+  if (path.startsWith('data:image') || path.startsWith('http')) return path;
+  return `${API_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 };
 
 export default function MyOrdersPage() {
@@ -92,11 +100,18 @@ export default function MyOrdersPage() {
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
                               <Image
-                                src={item.product?.image || '/placeholder-product.svg'}
+                                src={getImageUrl(item.product?.image || null)}
                                 alt={item.product?.name || 'Product image'}
                                 width={64}
                                 height={64}
                                 className="rounded-lg object-cover"
+                                unoptimized
+                                onError={(event) => {
+                                  const img = event.currentTarget as HTMLImageElement;
+                                  if (!img.src.includes('/placeholder-product.svg')) {
+                                    img.src = '/placeholder-product.svg';
+                                  }
+                                }}
                               />
                             </div>
                             <div className="ml-4">
