@@ -21,6 +21,7 @@ import { StoreShipping, ShippingCarrier, ShippingRate, ShippingScope } from '../
 import { getStoreShipping, updateStoreShipping } from '../services/storeShippingService';
 import { StorePayment } from '../types/storePayment';
 import { getStorePayment, updateStorePayment } from '../services/storePaymentService';
+import RichTextEditor from '../components/RichTextEditor';
 
 /**
  * Función helper para notificar al storefront que debe revalidar su caché.
@@ -517,36 +518,22 @@ const StoreSettings: React.FC = () => {
                         <TextField label="Descripción" value={generalForm.description ?? ''} onChange={e => setGeneralForm(f => ({ ...f, description: e.target.value }))} fullWidth multiline minRows={2} />
                       </Grid>
                       <Grid item xs={12}>
-                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                          Contenido página Nosotros
-                        </Typography>
-                        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                          <TextField
-                            value={generalForm.about ?? ''}
-                            onChange={(e) => setGeneralForm(f => ({ ...f, about: e.target.value }))}
-                            multiline
-                            minRows={6}
-                            fullWidth
-                            placeholder="Escribe la historia, misión, visión o valores de tu tienda."
-                            sx={{ bgcolor: '#fff' }}
-                          />
-                        </Box>
+                        <RichTextEditor
+                          label="Contenido página Nosotros"
+                          value={generalForm.about ?? ''}
+                          onChange={(value) => setGeneralForm(f => ({ ...f, about: value }))}
+                          placeholder="Escribe la historia, misión, visión o valores de tu tienda."
+                          minHeight={200}
+                        />
                       </Grid>
                       <Grid item xs={12}>
-                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                          Contenido página Contacto
-                        </Typography>
-                        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden', background: '#fff' }}>
-                          <TextField
-                            value={generalForm.contact ?? ''}
-                            onChange={(e) => setGeneralForm(f => ({ ...f, contact: e.target.value }))}
-                            multiline
-                            minRows={6}
-                            fullWidth
-                            placeholder="Agrega información de contacto, horarios, ubicación, etc."
-                            sx={{ bgcolor: '#fff' }}
-                          />
-                        </Box>
+                        <RichTextEditor
+                          label="Contenido página Contacto"
+                          value={generalForm.contact ?? ''}
+                          onChange={(value) => setGeneralForm(f => ({ ...f, contact: value }))}
+                          placeholder="Agrega información de contacto, horarios, ubicación, etc."
+                          minHeight={200}
+                        />
                       </Grid>
                     </Grid>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
@@ -876,14 +863,11 @@ const StoreSettings: React.FC = () => {
                       sx={{ mb: 2 }}
                     />
                     <Box sx={{ mb: 2 }}>
-                      <TextField
+                      <RichTextEditor
                         value={editingPolicy.content}
-                        onChange={(e) => setEditingPolicy({ ...editingPolicy, content: e.target.value })}
-                        multiline
-                        minRows={10}
-                        fullWidth
+                        onChange={(value) => setEditingPolicy({ ...editingPolicy, content: value })}
                         placeholder="Escribe el contenido de la política."
-                        sx={{ bgcolor: '#fff' }}
+                        minHeight={300}
                       />
                     </Box>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>

@@ -14,8 +14,15 @@ export default async function AboutPage() {
   }
 
   // Formateo automático: convierte saltos dobles en párrafos y líneas con guion en listas
+  // Solo si el contenido NO es HTML (para retrocompatibilidad con texto plano)
   function formatAboutText(text: string) {
     if (!text) return '<p>No hay información disponible.</p>';
+    
+    // Si ya es HTML (contiene tags), devolverlo tal cual
+    if (/<[^>]+>/.test(text)) {
+      return text;
+    }
+    
     // Listas: líneas que empiezan con "- "
     const lines = text.split(/\r?\n/);
     let html = '';

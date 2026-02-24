@@ -54,6 +54,7 @@ import {
 
 import { productsApi, categoriesApi, API_URL } from '../services/api';
 import { compressImages, validateImageFile } from '../utils/imageCompression';
+import RichTextEditor from '../components/RichTextEditor';
 
 /**
  * Función helper para notificar al storefront (Next.js) que debe revalidar su caché.
@@ -475,21 +476,13 @@ const Products = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Descripción del producto
-                  </Typography>
-                  <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
-                    <TextField
-                      value={values.description}
-                      onChange={handleChange}
-                      name="description"
-                      multiline
-                      minRows={6}
-                      fullWidth
-                      placeholder="Detalles, materiales, cuidados, etc."
-                      sx={{ bgcolor: '#fff' }}
-                    />
-                  </Box>
+                  <RichTextEditor
+                    label="Descripción del producto"
+                    value={values.description}
+                    onChange={(value) => setFieldValue('description', value)}
+                    placeholder="Detalles, materiales, cuidados, etc."
+                    minHeight={200}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <Button
