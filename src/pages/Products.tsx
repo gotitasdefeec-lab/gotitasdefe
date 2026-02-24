@@ -60,7 +60,7 @@ import RichTextEditor from '../components/RichTextEditor';
  * Función helper para notificar al storefront (Next.js) que debe revalidar su caché.
  * Esto permite que los cambios en productos aparezcan instantáneamente en la tienda.
  */
-async function revalidateStorefront(actions: string[]) {
+async function revalidateStorefront(actions: string[], productId?: number) {
   const storefrontUrl = process.env.REACT_APP_STOREFRONT_URL || 'https://www.gotasdefe.com';
   const revalidationToken = process.env.REACT_APP_REVALIDATION_TOKEN;
 
@@ -75,7 +75,7 @@ async function revalidateStorefront(actions: string[]) {
       const response = await fetch(`${storefrontUrl}/api/revalidate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: revalidationToken, action }),
+        body: JSON.stringify({ secret: revalidationToken, action, productId }),
       });
 
       if (response.ok) {
@@ -261,7 +261,7 @@ const Products = () => {
       setSnackbar({ open: true, message: 'Producto eliminado correctamente', severity: 'success' });
       
       // ✨ Revalidar caché del storefront para reflejar la eliminación
-      revalidateStorefront(['products', 'featured-products', `product-${productId}`]);
+      revalidateStorefront(['products', 'featured-products'], productId);
     } catch (e: any) {
       setSnackbar({ open: true, message: e?.message || 'Error al eliminar producto', severity: 'error' });
     }
@@ -288,7 +288,7 @@ const Products = () => {
         setSnackbar({ open: true, message: 'Producto actualizado', severity: 'success' });
         
         // ✨ Revalidar caché del storefront para mostrar cambios instantáneamente
-        revalidateStorefront(['products', 'featured-products', `product-${currentProduct.id}`]);
+        revalidateStorefront(['products', 'featured-products'], currentProduct.id);
       } else {
         const res = await productsApi.create(payload);
         const created = Array.isArray(res) ? res[0] : (res.data || res);
@@ -309,7 +309,7 @@ const Products = () => {
         setSnackbar({ open: true, message: 'Producto creado', severity: 'success' });
         
         // ✨ Revalidar caché del storefront para mostrar el nuevo producto
-        revalidateStorefront(['products', 'featured-products']);
+        revalidateStorefront(['products', 'featured-products'], Number(created.id));
       }
       setDialogOpen(false);
     } catch (e: any) {
@@ -452,6 +452,7 @@ const Products = () => {
                           setFieldValue('category', cat.name);
                           setNewCategory('');
                           setSnackbar({ open: true, message: 'Categoría creada', severity: 'success' });
+                          revalidateStorefront(['categories']);
                         } catch {
                           setSnackbar({ open: true, message: 'Error al crear categoría', severity: 'error' });
                         }
@@ -624,6 +625,7 @@ const Products = () => {
                                 setEditingCatId(null);
                                 setEditingCatName('');
                                 setSnackbar({ open: true, message: 'Categoría actualizada', severity: 'success' });
+                                revalidateStorefront(['categories']);
                               } catch (e: any) {
                                 setSnackbar({ open: true, message: e?.message || 'Error al actualizar categoría', severity: 'error' });
                               }
@@ -677,6 +679,7 @@ const Products = () => {
                       setFieldValue('category', '');
                     }
                     setSnackbar({ open: true, message: 'Categoría eliminada', severity: 'success' });
+                    revalidateStorefront(['categories']);
                   } catch (e: any) {
                     setSnackbar({ open: true, message: e?.message || 'Error al eliminar categoría', severity: 'error' });
                   } finally {

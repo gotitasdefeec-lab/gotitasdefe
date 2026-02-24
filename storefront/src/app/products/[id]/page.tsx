@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 
-// Cache de 24 horas para ahorrar bandwidth. On-Demand Revalidation actualiza instantáneamente cuando editas el producto
-export const revalidate = 86400; // 24 horas = máximo ahorro en Vercel
+export const revalidate = 86400;
 
 const BASE = (process.env.NEXT_PUBLIC_PUBLIC_API_URL || 'https://api.gotasdefe.com').replace(/\/$/, '');
 
@@ -16,7 +15,7 @@ async function getProduct(id: number) {
   try {
     const url = `${BASE}/public/products/${id}`;
     const res = await fetch(url, { 
-      next: { revalidate: 86400, tags: ['products', `product-${id}`] } // 24h cache + on-demand revalidation
+      next: { revalidate: 86400, tags: ['products', `product-${id}`] }
     });
     
     if (!res.ok) {

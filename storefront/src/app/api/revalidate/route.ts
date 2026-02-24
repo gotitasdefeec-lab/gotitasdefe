@@ -64,15 +64,32 @@ export async function POST(request: NextRequest) {
         'store-config': ['/'],
         'store-logo': ['/'],
         'store-general': ['/contact', '/about'],
+        'store-social': ['/'],
+        'store-shipping': ['/checkout'],
+        'store-payment': ['/checkout'],
         'policies': ['/'],
-        'categories': ['/products']
+        'categories': ['/products', '/']
       };
+
+      const productActionMatch = action.match(/^product-(\d+)$/);
+      if (productActionMatch) {
+        const actionProductId = Number(productActionMatch[1]);
+        revalidatePath(`/products/${actionProductId}`);
+        revalidatePath('/products/[id]', 'page');
+        revalidatedPaths.push(`/products/${actionProductId}`);
+        revalidatedPaths.push('/products/[id]');
+      }
       
       const pathsToRevalidate = actionPaths[action] || [];
       pathsToRevalidate.forEach(p => {
         revalidatePath(p);
         revalidatedPaths.push(p);
       });
+
+      if (['store-config', 'store-logo', 'store-general', 'store-social', 'store-shipping', 'store-payment', 'categories'].includes(action)) {
+        revalidatePath('/', 'layout');
+        revalidatedPaths.push('/ (layout)');
+      }
       
       console.log(`✅ Revalidated action "${action}": ${pathsToRevalidate.join(', ')}`);
     }
@@ -97,7 +114,9 @@ export async function POST(request: NextRequest) {
     if (productId) {
       const productPath = `/products/${productId}`;
       revalidatePath(productPath);
+      revalidatePath('/products/[id]', 'page');
       revalidatedPaths.push(productPath);
+      revalidatedPaths.push('/products/[id]');
       console.log(`✅ Revalidated product: ${productId}`);
     }
 
@@ -147,8 +166,11 @@ export async function GET() {
       'store-config': 'Revalidates /',
       'store-logo': 'Revalidates /',
       'store-general': 'Revalidates /contact and /about',
+      'store-social': 'Revalidates social links and footer/header',
+      'store-shipping': 'Revalidates /checkout',
+      'store-payment': 'Revalidates /checkout',
       'policies': 'Revalidates /',
-      'categories': 'Revalidates /products',
+      'categories': 'Revalidates /products and /',
       'home': 'Revalidates /',
       'all-products': 'Revalidates /products'
     }

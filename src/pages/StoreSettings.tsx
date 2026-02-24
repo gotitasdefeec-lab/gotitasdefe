@@ -331,6 +331,9 @@ const StoreSettings: React.FC = () => {
     try {
       const saved = await updateStoreSocial(socialForm);
       setSocialForm(saved);
+
+      // ✨ Revalidar configuración visible (header/footer/redes)
+      revalidateStorefront(['store-config', 'store-social']);
     } finally {
       setSocialLoading(false);
     }
@@ -352,6 +355,9 @@ const StoreSettings: React.FC = () => {
       const saved = await updateStoreShipping(payload);
       setShippingForm(saved);
       setUseFreeShipping((saved.freeShippingMin ?? 0) > 0);
+
+      // ✨ Revalidar checkout y configuración visible
+      revalidateStorefront(['store-config', 'store-shipping']);
     } finally {
       setShippingLoading(false);
     }
@@ -444,6 +450,9 @@ const StoreSettings: React.FC = () => {
     try {
       const saved = await updateStorePayment(paymentForm);
       setPaymentForm(saved);
+
+      // ✨ Revalidar checkout y configuración visible
+      revalidateStorefront(['store-config', 'store-payment']);
     } finally {
       setPaymentLoading(false);
     }

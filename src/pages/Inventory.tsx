@@ -54,6 +54,7 @@ import { inventoryApi, productsApi } from '../services/api';
 
 interface InventoryItem {
   id: number;
+  productId: number;
   product: string;
   sku: string;
   stock: number;
@@ -74,6 +75,25 @@ interface InventoryItem {
     date: string;
     stock: number;
   }[];
+}
+
+async function revalidateStorefront(actions: string[], productId?: number) {
+  const storefrontUrl = process.env.REACT_APP_STOREFRONT_URL || 'https://www.gotasdefe.com';
+  const revalidationToken = process.env.REACT_APP_REVALIDATION_TOKEN;
+
+  if (!revalidationToken) return;
+
+  try {
+    for (const action of actions) {
+      await fetch(`${storefrontUrl}/api/revalidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: revalidationToken, action, productId }),
+      });
+    }
+  } catch (error) {
+    console.error('❌ No se pudo revalidar storefront desde inventario:', error);
+  }
 }
 
 const Inventory = () => {
@@ -160,6 +180,7 @@ const Inventory = () => {
           
           return {
             id: Number(row.id),
+            productId: Number(row.productId),
             product: prod?.name || `Producto ${row.productId}`,
             sku: prod?.sku || `SKU-${row.productId}`,
             stock,
@@ -574,6 +595,7 @@ const Inventory = () => {
           : item
       ));
       setSnackbar({ open: true, message: 'Movimiento registrado correctamente', severity: 'success' });
+      revalidateStorefront(['products', 'featured-products'], currentItem.productId);
       setMovementDialogOpen(false);
       setMovementQty(0);
       setMovementReason('');
