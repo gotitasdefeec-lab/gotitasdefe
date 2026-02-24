@@ -478,7 +478,7 @@ const Products = () => {
                 <Grid item xs={12}>
                   <RichTextEditor
                     label="Descripción del producto"
-                    value={values.description}
+                    value={values.description || ''}
                     onChange={(value) => setFieldValue('description', value)}
                     placeholder="Detalles, materiales, cuidados, etc."
                     minHeight={200}

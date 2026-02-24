@@ -81,6 +81,8 @@ const StoreSettings: React.FC = () => {
     email: '',
     phone: '',
     address: '',
+    about: '',
+    contact: '',
   });
   const [generalLoading, setGeneralLoading] = useState(false);
   // Marca
@@ -864,7 +866,7 @@ const StoreSettings: React.FC = () => {
                     />
                     <Box sx={{ mb: 2 }}>
                       <RichTextEditor
-                        value={editingPolicy.content}
+                        value={editingPolicy.content || ''}
                         onChange={(value) => setEditingPolicy({ ...editingPolicy, content: value })}
                         placeholder="Escribe el contenido de la política."
                         minHeight={300}

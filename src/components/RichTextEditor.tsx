@@ -24,6 +24,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   minHeight = 200,
 }) => {
   const [mounted, setMounted] = useState(false);
+  
+  // Asegurar que siempre tengamos un string válido
+  const safeValue = value ?? '';
 
   useEffect(() => {
     setMounted(true);
@@ -123,7 +126,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       >
         <ReactQuill
           theme="snow"
-          value={value}
+          value={safeValue}
           onChange={onChange}
           modules={modules}
           formats={formats}
