@@ -31,12 +31,16 @@ export class ProductsService {
       select: {
         id: true,
         name: true,
+        description: true, // Necesario para mapProductForStorefront()
         price: true,
         stock: true,
         images: true, // URLs optimizadas: ["/uploads/products/img.webp"]
+        image: true, // Campo legacy
         category: true,
         sku: true,
-        // NO incluir 'description' para reducir payload
+        status: true, // Necesario para mapear 'active'
+        createdAt: true, // Timestamps pequeños
+        updatedAt: true,
       },
     });
   }

@@ -56,20 +56,20 @@ export class PublicController {
     return {
       id: product.id,
       name: product.name,
-      description: product.description,
+      description: product.description || '',
       price: product.price,
-      image: product.image,
+      image: product.image || null,
       images: Array.isArray(product.images) ? product.images : [],
       categoryId: 1, // Default category ID
-      category: product.category,
-      stock: product.stock,
-      sku: product.sku,
+      category: product.category || 'Uncategorized',
+      stock: product.stock || 0,
+      sku: product.sku || '',
       active: product.status === 'active',
       featured: true, // All products in featured endpoint are featured
       tags: [],
       specifications: {},
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
+      createdAt: product.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: product.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 
