@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { categoryService } from '@/services/categoryService';
 import { productService } from '@/services/productService';
+import { API_URL } from '@/services/api';
 import { Category, Product } from '@/types';
 import Image from 'next/image';
 
@@ -174,6 +175,17 @@ const Header: React.FC<HeaderProps> = ({ storeName = 'Mi Tienda', logoUrl, isCar
     return () => clearTimeout(timeoutId);
   }, [mobileSearchTerm]);
 
+  // Helper function to construct correct image URLs
+  const getImageUrl = (imagePath?: string | null) => {
+    if (!imagePath) return '/placeholder-product.svg';
+    if (typeof imagePath !== 'string') return '/placeholder-product.svg';
+    const path = imagePath.trim();
+    if (path.startsWith('data:image') || path.startsWith('http')) return path;
+    const cleanUrl = API_URL.replace(/\/$/, '');
+    const cleanPath = path.replace(/^\//, '');
+    return `${cleanUrl}/${cleanPath}`;
+  };
+
   // Suggestions dropdown component
   const SuggestionsDropdown = ({ 
     suggestions, 
@@ -203,7 +215,7 @@ const Header: React.FC<HeaderProps> = ({ storeName = 'Mi Tienda', logoUrl, isCar
             <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
               {product.image || (product.images && product.images[0]) ? (
                 <Image
-                  src={product.image || (product.images && product.images[0]) || '/placeholder-product.svg'}
+                  src={getImageUrl(product.image || (product.images && product.images[0]))}
                   alt={product.name}
                   width={48}
                   height={48}

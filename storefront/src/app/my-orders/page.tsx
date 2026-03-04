@@ -100,7 +100,7 @@ export default function MyOrdersPage() {
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
                               <Image
-                                src={getImageUrl(item.product?.image || null)}
+                                src={getImageUrl(item.product?.images?.[0] || item.product?.image || null)}
                                 alt={item.product?.name || 'Product image'}
                                 width={64}
                                 height={64}
