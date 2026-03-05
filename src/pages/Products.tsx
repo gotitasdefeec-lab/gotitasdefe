@@ -313,7 +313,18 @@ const Products = () => {
       }
       setDialogOpen(false);
     } catch (e: any) {
-      setSnackbar({ open: true, message: e?.message || 'Error al guardar producto', severity: 'error' });
+      // Detectar errores específicos de campos únicos
+      let errorMessage = e?.message || 'Error al guardar producto';
+      
+      if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('sku')) {
+        errorMessage = '⚠️ El SKU ya existe. Por favor usa un código único diferente.';
+      } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('name')) {
+        errorMessage = '⚠️ El nombre del producto ya existe. Por favor usa un nombre diferente.';
+      } else if (errorMessage.includes('Unique constraint failed')) {
+        errorMessage = '⚠️ Ya existe un producto con estos datos. Verifica los campos únicos (SKU, nombre).';
+      }
+      
+      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
 

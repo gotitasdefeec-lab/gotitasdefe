@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImageOptimizationService } from '../common/image-optimization.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -60,32 +61,46 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto) {
     const { images, ...rest } = createProductDto;
     
-    // ✨ Optimizar imágenes automáticamente (19MB → 300KB) y guardar como archivos
-    const optimizedImages = Array.isArray(images) && images.length > 0
-      ? await this.imageOptimization.optimizeImages(images, { type: 'product' })
-      : [];
-    
-    const product = await this.prisma.product.create({
-      data: {
-        ...rest,
-        images: optimizedImages,
-        minStock: createProductDto.minStock ?? 10,
-        status: createProductDto.status ?? 'active',
-      },
-    });
+    try {
+      // ✨ Optimizar imágenes automáticamente (19MB → 300KB) y guardar como archivos
+      const optimizedImages = Array.isArray(images) && images.length > 0
+        ? await this.imageOptimization.optimizeImages(images, { type: 'product' })
+        : [];
+      
+      const product = await this.prisma.product.create({
+        data: {
+          ...rest,
+          images: optimizedImages,
+          minStock: createProductDto.minStock ?? 10,
+          status: createProductDto.status ?? 'active',
+        },
+      });
 
-    // Create corresponding inventory entry
-    await this.prisma.inventory.create({
-      data: {
-        productId: product.id,
-        quantity: createProductDto.stock,
-        minStock: createProductDto.minStock ?? 10,
-        maxStock: 100,
-        location: 'Almacén',
-      },
-    });
+      // Create corresponding inventory entry
+      await this.prisma.inventory.create({
+        data: {
+          productId: product.id,
+          quantity: createProductDto.stock,
+          minStock: createProductDto.minStock ?? 10,
+          maxStock: 100,
+          location: 'Almacén',
+        },
+      });
 
-    return product;
+      return product;
+    } catch (error) {
+      // Manejar errores de campos únicos de Prisma
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          const target = (error.meta?.target as string[]) || [];
+          if (target.includes('sku')) {
+            throw new ConflictException('El SKU ya existe. Por favor usa un código único diferente.');
+          }
+          throw new ConflictException('Ya existe un producto con estos datos únicos.');
+        }
+      }
+      throw error;
+    }
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {

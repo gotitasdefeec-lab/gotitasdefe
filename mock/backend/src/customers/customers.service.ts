@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CustomersService {
@@ -19,14 +20,46 @@ export class CustomersService {
   }
 
   async create(data: any) {
-    return this.prisma.customer.create({ data });
+    try {
+      return await this.prisma.customer.create({ data });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          const target = (error.meta?.target as string[]) || [];
+          if (target.includes('email')) {
+            throw new ConflictException('Este email ya está registrado. Por favor usa un email diferente.');
+          }
+          if (target.includes('cedula')) {
+            throw new ConflictException('Esta cédula ya está registrada. Por favor verifica el número.');
+          }
+          throw new ConflictException('Ya existe un cliente con estos datos únicos.');
+        }
+      }
+      throw error;
+    }
   }
 
   async update(id: number, data: any) {
-    return this.prisma.customer.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.prisma.customer.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          const target = (error.meta?.target as string[]) || [];
+          if (target.includes('email')) {
+            throw new ConflictException('Este email ya está registrado. Por favor usa un email diferente.');
+          }
+          if (target.includes('cedula')) {
+            throw new ConflictException('Esta cédula ya está registrada. Por favor verifica el número.');
+          }
+          throw new ConflictException('Ya existe un cliente con estos datos únicos.');
+        }
+      }
+      throw error;
+    }
   }
 
   async delete(id: number) {

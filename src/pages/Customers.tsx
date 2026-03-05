@@ -100,8 +100,19 @@ const Customers: React.FC = () => {
         }
         await fetchCustomers();
         handleCloseDialog();
-      } catch (error) {
-        setSnackbar({ open: true, message: 'Error al guardar el cliente', severity: 'error' });
+      } catch (error: any) {
+        // Detectar errores específicos de campos únicos
+        let errorMessage = error?.message || 'Error al guardar el cliente';
+        
+        if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('email')) {
+          errorMessage = '⚠️ Este email ya está registrado. Por favor usa un email diferente.';
+        } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('cedula')) {
+          errorMessage = '⚠️ Esta cédula ya está registrada. Por favor verifica el número.';
+        } else if (errorMessage.includes('Unique constraint failed')) {
+          errorMessage = '⚠️ Ya existe un cliente con estos datos. Verifica email y cédula.';
+        }
+        
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       } finally {
         setLoading(false);
       }
