@@ -92,7 +92,8 @@ export default function CartPage() {
   }
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal >= shippingThreshold ? 0 : shippingCost; // Envío gratis por compras mayores al umbral configurado
+  // Solo aplicar envío gratis si shippingThreshold > 0 Y subtotal >= threshold
+  const shipping = (shippingThreshold > 0 && subtotal >= shippingThreshold) ? 0 : shippingCost;
   const tax = 0; // Impuestos deshabilitados por defecto
   const total = subtotal + shipping + tax;
 
@@ -223,7 +224,7 @@ export default function CartPage() {
                   </span>
                 </div>
                 
-                {shipping > 0 && subtotal < shippingThreshold && (
+                {shipping > 0 && shippingThreshold > 0 && subtotal < shippingThreshold && (
                   <div className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md p-3">
                     💡 ¡Agrega {formatPrice(shippingThreshold - subtotal)} más para envío gratis!
                   </div>
@@ -262,10 +263,12 @@ export default function CartPage() {
               {/* Trust Badges */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-start gap-2">
-                    <span>✓</span>
-                    <span>Envío gratis en compras mayores a {formatPrice(shippingThreshold)}</span>
-                  </div>
+                  {shippingThreshold > 0 && (
+                    <div className="flex items-start gap-2">
+                      <span>✓</span>
+                      <span>Envío gratis en compras mayores a {formatPrice(shippingThreshold)}</span>
+                    </div>
+                  )}
                   <div className="flex items-start gap-2">
                     <span>✓</span>
                     <span>Devoluciones gratis en 30 días</span>

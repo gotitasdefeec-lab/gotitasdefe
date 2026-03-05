@@ -87,7 +87,13 @@ export default function CheckoutPage() {
   const subtotal = useMemo(() => items.reduce((sum, it) => sum + it.product.price * it.quantity, 0), [items]);
   const selectedMethod = useMemo(() => shippingMethods.find((m) => m.id === formData.shippingMethodId), [shippingMethods, formData.shippingMethodId]);
   const baseShipping = useMemo(() => (selectedMethod ? selectedMethod.cost : 5.99), [selectedMethod]);
-  const shipping = useMemo(() => (subtotal >= freeShippingThreshold ? 0 : baseShipping), [subtotal, freeShippingThreshold, baseShipping]);
+  // Solo aplicar envío gratis si freeShippingThreshold > 0 Y subtotal >= threshold
+  const shipping = useMemo(() => {
+    if (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold) {
+      return 0;
+    }
+    return baseShipping;
+  }, [subtotal, freeShippingThreshold, baseShipping]);
   const tax = useMemo(() => (taxEnabled ? subtotal * taxRate : 0), [taxEnabled, subtotal, taxRate]);
   
   // Cálculo de la comisión del 5.4% para tarjeta de crédito/débito y PayPal
@@ -482,7 +488,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-gray-200 pt-8">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Método de envío</h2>
                   <ShippingMethodSelector methods={shippingMethods} value={formData.shippingMethodId} onChange={(id) => handleInputChange('shippingMethodId', id)} currency={currency} />
-                  {subtotal >= freeShippingThreshold && <p className="text-sm text-green-700 mt-3 bg-green-50 border border-green-200 rounded-md p-3">✓ ¡Envío gratis! Tu pedido supera {formatPrice(freeShippingThreshold)}</p>}
+                  {freeShippingThreshold > 0 && subtotal >= freeShippingThreshold && <p className="text-sm text-green-700 mt-3 bg-green-50 border border-green-200 rounded-md p-3">✓ ¡Envío gratis! Tu pedido supera {formatPrice(freeShippingThreshold)}</p>}
                 </div>
                 <div className="border-t border-gray-200 pt-8">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Método de pago</h2>
