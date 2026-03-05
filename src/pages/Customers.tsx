@@ -102,9 +102,13 @@ const Customers: React.FC = () => {
         handleCloseDialog();
       } catch (error: any) {
         // Detectar errores específicos de campos únicos
-        let errorMessage = error?.message || 'Error al guardar el cliente';
+        // El mensaje puede venir en error.response.data.message (axios) o error.message
+        let errorMessage = error?.response?.data?.message || error?.message || 'Error al guardar el cliente';
         
-        if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('email')) {
+        // Verificar si el mensaje ya viene traducido del backend
+        if (errorMessage.includes('email ya está registrado') || errorMessage.includes('cédula ya está registrada')) {
+          // Ya está traducido, usar tal cual
+        } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('email')) {
           errorMessage = '⚠️ Este email ya está registrado. Por favor usa un email diferente.';
         } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('cedula')) {
           errorMessage = '⚠️ Esta cédula ya está registrada. Por favor verifica el número.';

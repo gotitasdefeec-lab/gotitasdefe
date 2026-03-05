@@ -314,9 +314,13 @@ const Products = () => {
       setDialogOpen(false);
     } catch (e: any) {
       // Detectar errores específicos de campos únicos
-      let errorMessage = e?.message || 'Error al guardar producto';
+      // El mensaje puede venir en e.response.data.message (axios) o e.message
+      let errorMessage = e?.response?.data?.message || e?.message || 'Error al guardar producto';
       
-      if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('sku')) {
+      // Verificar si el mensaje ya viene traducido del backend
+      if (errorMessage.includes('SKU ya existe') || errorMessage.includes('código único')) {
+        // Ya está traducido, usar tal cual
+      } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('sku')) {
         errorMessage = '⚠️ El SKU ya existe. Por favor usa un código único diferente.';
       } else if (errorMessage.includes('Unique constraint failed') && errorMessage.includes('name')) {
         errorMessage = '⚠️ El nombre del producto ya existe. Por favor usa un nombre diferente.';
